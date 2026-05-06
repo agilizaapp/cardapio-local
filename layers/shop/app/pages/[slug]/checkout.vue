@@ -26,7 +26,7 @@
       <h1
         class="text-lg font-bold tracking-[0.2em] uppercase flex-1 text-center pr-8"
       >
-        Your Cart
+        Seu Carrinho
       </h1>
     </header>
 
@@ -57,15 +57,15 @@
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
         </div>
-        <h2 class="text-xl font-bold">Your cart is empty</h2>
+        <h2 class="text-xl font-bold">Seu carrinho está vazio</h2>
         <p class="text-[#797676] text-sm">
-          Looks like you haven't added anything to your cart yet.
+          Parece que você ainda não adicionou nada ao seu carrinho.
         </p>
         <button
           @click="$router.push(`/${route.params.slug}`)"
           class="mt-4 px-6 py-2.5 bg-[#1A1A1A] text-white font-bold text-xs tracking-wider uppercase rounded"
         >
-          Continue Shopping
+          Continuar Comprando
         </button>
       </div>
 
@@ -75,7 +75,7 @@
           <div class="flex justify-between items-end mb-4">
             <span
               class="text-xs font-bold text-[#797676] uppercase tracking-wider"
-              >{{ totalItems }} items</span
+              >{{ totalItems }} itens</span
             >
           </div>
           <div class="border-t border-gray-100">
@@ -132,6 +132,7 @@ const {
 } = useCart();
 const { generateWhatsappUrl } = useCheckout();
 const storeStores = useStoreStores();
+const storeName = computed(() => storeStores.getCurrentStore?.name ?? "");
 
 const formState = ref({
   firstName: "",
@@ -146,14 +147,14 @@ const shippingFee = computed(() =>
 // Simulando uma taxa de imposto caso queira exibir
 const estimatedTax = computed(() => subtotal.value * 0.08);
 
-const handleFinalize = () => {
+const handleFinalize = async () => {
   // Validação básica de UI
   if (!formState.value.firstName || !formState.value.lastName) {
-    alert("Please fill your name.");
+    alert("Por favor, preencha seu nome.");
     return;
   }
   if (formState.value.deliveryMethod === "home" && !formState.value.address) {
-    alert("Please provide a shipping address.");
+    alert("Por favor, informe o endereço de entrega.");
     return;
   }
 
@@ -165,6 +166,6 @@ const handleFinalize = () => {
 };
 
 useHead({
-  title: "Your Cart - Pristine",
+  title: `Seu Carrinho - ${storeName.value}`,
 });
 </script>

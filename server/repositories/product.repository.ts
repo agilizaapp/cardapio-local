@@ -31,15 +31,31 @@ function toProduct(db: DbProductWithCategory): Product {
 export function createProductRepository(client: SupabaseClient) {
     return {
         // Vitrine pública: todos os produtos ativos de uma loja
-        async findByStore(storeId: string): Promise<Product[]> {
-            const result = await client
+        async findByStore(storeId: string, options?: { query?: string; categoryId?: string; page?: number; limit?: number }): Promise<Product[]> {
+            let qb = client
                 .from('products')
                 .select('*, categories(name)')
                 .eq('store_id', storeId)
                 .eq('active', true)
                 .is('deleted_at', null)
                 .order('created_at', { ascending: false })
-                .returns<DbProductWithCategory[]>()
+
+            if (options?.categoryId && options.categoryId !== 'all') {
+                qb = qb.eq('category_id', options.categoryId)
+            }
+
+            if (options?.query) {
+                qb = qb.ilike('name', `%${options.query}%`)
+            }
+
+            const page = options?.page ?? 1
+            const limit = options?.limit ?? 5
+            const from = (page - 1) * limit
+            const to = from + limit - 1
+            
+            qb = qb.range(from, to)
+
+            const result = await qb.returns<DbProductWithCategory[]>()
 
             return unwrap(result).map(toProduct)
         },

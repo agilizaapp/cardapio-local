@@ -15,6 +15,7 @@ export interface DbStore {
     owner_id: string
     slug: string
     name: string
+    description: string | null
     logo_url: string | null
     pix_key: string | null
     delivery_fee: number

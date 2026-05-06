@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-6">
     <!-- Logistics -->
     <div>
-      <h3 class="text-lg font-bold text-[#1A1A1A] mb-3">Logistics</h3>
+      <h3 class="text-lg font-bold text-[#1A1A1A] mb-3">Logística</h3>
       <div class="flex flex-col gap-3">
         <label
           class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors"
@@ -23,8 +23,8 @@
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="font-bold text-sm text-[#1A1A1A]">Home Delivery</span>
-            <span class="text-xs text-[#797676]">Est. arrival in 3-5 days</span>
+            <span class="font-bold text-sm text-[#1A1A1A]">Entrega em Domicílio</span>
+            <span class="text-xs text-[#797676]">Previsão de 3 a 5 dias</span>
           </div>
           <div class="ml-auto" v-if="modelValue.deliveryMethod === 'home'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1A1A1A]" viewBox="0 0 20 20" fill="currentColor">
@@ -51,8 +51,8 @@
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="font-bold text-sm text-[#1A1A1A]">Local Pickup</span>
-            <span class="text-xs text-[#797676]">Ready in 24 hours</span>
+            <span class="font-bold text-sm text-[#1A1A1A]">Retirada no Local</span>
+            <span class="text-xs text-[#797676]">Pronto em 24 horas</span>
           </div>
           <div class="ml-auto" v-if="modelValue.deliveryMethod === 'pickup'">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1A1A1A]" viewBox="0 0 20 20" fill="currentColor">
@@ -66,35 +66,35 @@
     <!-- Personal Info -->
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-[#797676]">First Name</label>
+        <label class="text-xs font-bold text-[#797676]">Nome</label>
         <input
           type="text"
           :value="modelValue.firstName"
           @input="updateField('firstName', ($event.target as HTMLInputElement).value)"
           class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] focus:border-[#1A1A1A] text-sm"
-          placeholder="John"
+          placeholder="João"
         />
       </div>
       
       <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-bold text-[#797676]">Last Name</label>
+        <label class="text-xs font-bold text-[#797676]">Sobrenome</label>
         <input
           type="text"
           :value="modelValue.lastName"
           @input="updateField('lastName', ($event.target as HTMLInputElement).value)"
           class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] focus:border-[#1A1A1A] text-sm"
-          placeholder="Doe"
+          placeholder="Silva"
         />
       </div>
 
       <div class="flex flex-col gap-1.5" v-if="modelValue.deliveryMethod === 'home'">
-        <label class="text-xs font-bold text-[#797676]">Shipping Address</label>
+        <label class="text-xs font-bold text-[#797676]">Endereço de Entrega</label>
         <input
           type="text"
           :value="modelValue.address"
           @input="updateField('address', ($event.target as HTMLInputElement).value)"
           class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] focus:border-[#1A1A1A] text-sm"
-          placeholder="123 Pristine Avenue, Studio 4"
+          placeholder="Rua Exemplo, 123, Apto 4"
         />
       </div>
     </div>

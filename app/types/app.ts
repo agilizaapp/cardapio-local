@@ -23,6 +23,7 @@ export interface Store {
     id: string
     slug: string
     name: string
+    description: string | null
     logoUrl: string | null
     pixKey: string | null
     deliveryFee: number

@@ -7,6 +7,10 @@ export default defineEventHandler(async (event) => {
   // 1. Pega os parâmetros da URL
   const query = getQuery(event)
   const storeId = query.storeId as string
+  const q = query.q as string | undefined
+  const categoryId = query.categoryId as string | undefined
+  const page = query.page ? parseInt(query.page as string) : 1
+  const limit = query.limit ? parseInt(query.limit as string) : 5
 
   // 2. Validação da Camada de Entrada (Clean Code)
   if (!storeId) {
@@ -20,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event)
 
   // 3. Passa a execução para o Service
-  const products = await productService.getAll(supabase, storeId)
+  const products = await productService.getAll(supabase, storeId, { query: q, categoryId, page, limit })
 
   // 4. Retorna sucesso
   return { success: true, data: products }

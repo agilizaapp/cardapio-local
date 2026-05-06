@@ -19,6 +19,7 @@ function toStore(db: DbStore, categories?: DbCategory[]): Store {
         id: db.id,
         slug: db.slug,
         name: db.name,
+        description: db.description,
         logoUrl: db.logo_url,
         whatsapp: db.whatsapp,
         pixKey: db.pix_key,
