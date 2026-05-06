@@ -1,14 +1,14 @@
 <template>
-  <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+  <div class="flex items-center gap-3 overflow-x-auto pb-4 pt-2 px-1 scrollbar-hide">
     <button
       v-for="category in categories"
       :key="category.id"
       @click="$emit('select', category.id)"
       :class="[
-        'px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap',
+        'px-5 py-2 rounded-full text-sm font-semibold tracking-wide transition-all duration-300 whitespace-nowrap active:scale-95',
         selectedCategoryId === category.id
-          ? 'bg-[#1A1A1A] text-white'
-          : 'bg-white text-[#1A1A1A] border border-gray-200 hover:bg-gray-50',
+          ? 'bg-primary text-white shadow-md shadow-primary/20'
+          : 'bg-white text-gray-600 border border-black/5 shadow-sm hover:bg-gray-50 hover:text-gray-900 hover:shadow',
       ]"
     >
       {{ category.name }}

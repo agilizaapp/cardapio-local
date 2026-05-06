@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white font-sans text-[#1A1A1A]">
+  <div class="min-h-screen bg-gray-50/50 text-[#1A1A1A] transition-colors duration-500" style="font-family: var(--font-primary, sans-serif)">
     <StoreHeader
       :storeName="store?.name || 'PRISTINE'"
       :cartItemsCount="totalItems"
@@ -133,16 +133,37 @@ const handleAddToCartFromModal = (product: Product, specs: Record<string, string
   // Opcional: mostrar um toast
 };
 
+const getFontFamily = (fontName: string) => {
+  const map: Record<string, string> = {
+    'playfair': 'Playfair Display',
+    'inter': 'Inter',
+    'outfit': 'Outfit',
+    'roboto': 'Roboto'
+  };
+  return map[fontName?.toLowerCase()] || 'Inter';
+};
+
 const themeVars = computed(() => {
   if (!store?.themeSettings) return "";
+  const fontFamily = store.themeSettings.font ? getFontFamily(store.themeSettings.font) : 'Inter';
   return `:root {
     --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
     --secondary: ${store.themeSettings.secondaryColor || "#FFFFFF"};
+    --font-primary: '${fontFamily}', sans-serif;
   }`;
 });
 
 useHead({
   title: store?.name ? `${store.name} - Catálogo` : "Catálogo",
+  link: computed(() => {
+    const font = store?.themeSettings?.font ? getFontFamily(store.themeSettings.font) : 'Inter';
+    return [
+      {
+        rel: 'stylesheet',
+        href: `https://fonts.googleapis.com/css2?family=${font.replace(' ', '+')}:wght@400;500;600;700;800&display=swap`
+      }
+    ];
+  }),
   style: [{ innerHTML: themeVars.value }],
 });
 </script>

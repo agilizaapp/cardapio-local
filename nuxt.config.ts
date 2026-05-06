@@ -6,7 +6,8 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@pinia/nuxt',
     'nuxt-icons',
-    '@nuxtjs/supabase'
+    '@nuxtjs/supabase',
+    '@nuxtjs/tailwindcss'
   ],
   supabase: { redirect: false },
   // imports: {

@@ -5,18 +5,18 @@
   >
     <!-- Backdrop -->
     <div
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+      class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity"
       @click="close"
     />
 
     <!-- Modal Content -->
     <Card
-      class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row gap-6 p-6 z-10 animate-in fade-in zoom-in-95 duration-200"
+      class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row gap-6 p-6 z-10 animate-in fade-in zoom-in-95 duration-300"
     >
       <!-- Close Button -->
       <button
         @click="close"
-        class="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 rounded-full transition-colors"
+        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 rounded-full transition-all active:scale-90"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -55,17 +55,17 @@
       <!-- Details -->
       <div class="w-full md:w-1/2 flex flex-col">
         <h2
-          class="text-2xl font-extrabold text-[#1A1A1A] uppercase tracking-wide leading-tight mb-2"
+          class="text-2xl font-black text-gray-900 uppercase tracking-widest leading-tight mb-2"
         >
           {{ product?.name }}
         </h2>
-        <span class="text-xl text-[#6B7280] font-medium mb-4">
+        <span class="text-xl text-primary font-bold mb-4">
           {{ formattedPrice }}
         </span>
 
-        <p class="text-sm text-[#797676] leading-relaxed mb-6 flex-1">
+        <p class="text-sm text-gray-500 leading-relaxed mb-6 flex-1">
           {{
-            product?.description || "No description available for this product."
+            product?.description || "Sem descrição disponível para este produto."
           }}
         </p>
 
@@ -77,7 +77,7 @@
             class="flex flex-col gap-2"
           >
             <label
-              class="text-xs font-bold text-[#1A1A1A] uppercase tracking-wider"
+              class="text-xs font-bold text-gray-900 uppercase tracking-widest"
               >{{ key }}</label
             >
             <div class="flex flex-wrap gap-2">
@@ -87,10 +87,10 @@
                 @click="selectedSpecs[key] = option"
                 :class="
                   cn(
-                    'px-3 py-1.5 text-sm border rounded-md transition-colors',
+                    'px-4 py-2 text-sm font-semibold border rounded-xl transition-all duration-300 active:scale-95',
                     selectedSpecs[key] === option
-                      ? 'border-primary bg-primary/5 text-primary font-bold'
-                      : 'border-gray-200 text-gray-700 hover:border-gray-300',
+                      ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
+                      : 'border-black/5 bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900',
                   )
                 "
               >

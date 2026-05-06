@@ -1,45 +1,45 @@
 <template>
-  <div class="flex flex-col gap-3 group">
+  <div class="flex flex-col group relative">
     <!-- Image -->
-    <div class="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden">
+    <div class="relative aspect-[4/5] bg-gray-50 rounded-2xl overflow-hidden border border-black/5 shadow-sm transition-all duration-500 group-hover:shadow-md">
       <img
         v-if="product.imageUrls?.length"
         :src="product.imageUrls[0]"
         :alt="product.name"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
       <div
         v-else
-        class="w-full h-full flex items-center justify-center text-gray-400"
+        class="w-full h-full flex items-center justify-center text-gray-400 text-sm"
       >
-        No Image
+        Sem Imagem
       </div>
     </div>
 
     <!-- Info -->
-    <div class="flex justify-between items-start mt-2">
-      <h3
-        class="text-sm font-bold text-[#1A1A1A] uppercase tracking-wide leading-tight flex-1 pr-2"
-      >
-        {{ product.name }}
-      </h3>
-      <span class="text-sm text-[#6B7280]">
-        {{ formattedPrice }}
-      </span>
+    <div class="flex flex-col mt-4 px-1 gap-1">
+      <div class="flex justify-between items-start gap-2">
+        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest leading-tight">
+          {{ product.name }}
+        </h3>
+        <span class="text-sm font-semibold text-primary shrink-0">
+          {{ formattedPrice }}
+        </span>
+      </div>
     </div>
 
     <!-- Actions -->
-    <div class="flex gap-2 mt-1">
+    <div class="flex gap-2 mt-4 px-1">
       <Button
         variant="outline"
         @click="$emit('view-details', product)"
-        class="flex-1 text-xs tracking-wider uppercase px-2"
+        class="flex-1 text-[10px] tracking-widest uppercase px-0"
       >
         Detalhes
       </Button>
       <Button
         @click="$emit('add-to-cart', product)"
-        class="flex-1 text-xs tracking-wider uppercase px-2"
+        class="flex-1 text-[10px] tracking-widest uppercase px-0"
       >
         Comprar
       </Button>
