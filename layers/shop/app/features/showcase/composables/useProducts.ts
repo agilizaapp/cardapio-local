@@ -70,7 +70,8 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
             }
         }
 
-        return { productsList, loadMore, hasMore, isLoadingMore, pending }
+        const allProducts = computed(() => productsList.value) // fallback for server-side
+        return { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending }
 
     } else {
         // ESTRATÉGIA CLIENT-SIDE: Busca tudo, filtra local, exibe de forma progressiva (lazy load)
@@ -139,6 +140,7 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
             isLoadingMore.value = false
         }
 
-        return { productsList, loadMore, hasMore, isLoadingMore, pending }
+        const allProducts = computed(() => storeProducts.allProducts || [])
+        return { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending }
     }
 }
