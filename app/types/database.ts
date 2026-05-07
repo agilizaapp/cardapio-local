@@ -56,6 +56,7 @@ export interface DbProduct {
     image_urls: string[]
     specifications: DbProductSpec[]
     variation_options: DbProductVariationOption
+    highlighted: boolean
     active: boolean
     deleted_at: string | null
     created_at: string

@@ -12,9 +12,6 @@
     <main class="px-4 py-6 flex flex-col gap-6">
       <!-- Intro / Title -->
       <section>
-        <h2 class="text-3xl font-extrabold tracking-tight mb-2 uppercase">
-          {{ store?.name || "Coleção" }}
-        </h2>
         <p
           v-if="store?.description"
           class="text-[#797676] text-sm leading-relaxed"
@@ -22,6 +19,16 @@
           {{ store?.description }}
         </p>
       </section>
+
+      <!-- Hero Banner (Destaques) -->
+      <ClientOnly>
+        <HeroBanner
+          v-if="!searchQuery && selectedCategoryId === 'all'"
+          :products="allProducts"
+          @select-product="handleViewDetails"
+          @add-to-cart="handleAddToCart"
+        />
+      </ClientOnly>
 
       <!-- Search -->
       <SearchBar v-model="searchQuery" />
@@ -35,28 +42,38 @@
 
       <!-- Categorized Layout (Only when no search and 'all' is selected) -->
       <template v-if="selectedCategoryId === 'all' && !searchQuery">
-        <section v-for="category in categoriesWithProducts" :key="category.id" class="mt-4">
+        <section
+          v-for="category in categoriesWithProducts"
+          :key="category.id"
+          class="mt-4"
+        >
           <div class="flex justify-between items-end mb-4 px-1">
-            <h3 class="text-lg font-bold text-gray-900 uppercase tracking-tight">{{ category.name }}</h3>
-            <button 
-              v-if="category.products.length > 5" 
+            <h3
+              class="text-lg font-bold text-gray-900 uppercase tracking-tight"
+            >
+              {{ category.name }}
+            </h3>
+            <button
+              v-if="category.products.length > 5"
               @click="selectedCategoryId = category.id"
               class="text-sm font-semibold text-[var(--primary)] hover:opacity-80 transition-opacity"
             >
               Ver mais
             </button>
           </div>
-          
-          <div class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-4 px-4">
-            <div 
-              v-for="product in category.products.slice(0, 5)" 
-              :key="product.id" 
+
+          <div
+            class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-4 px-4"
+          >
+            <div
+              v-for="product in category.products.slice(0, 5)"
+              :key="product.id"
               class="w-[60vw] sm:w-[220px] flex-shrink-0 snap-start"
             >
               <ProductCard
                 :product="product"
                 @view-details="handleViewDetails"
-                @add-to-cart="handleAddProduct"
+                @add-to-cart="handleAddToCart"
               />
             </div>
           </div>
@@ -78,7 +95,7 @@
             :key="product.id"
             :product="product"
             @view-details="handleViewDetails"
-            @add-to-cart="handleAddProduct"
+            @add-to-cart="handleAddToCart"
           />
           <div
             v-if="productsList.length === 0 && !pending"
@@ -89,8 +106,15 @@
         </section>
 
         <!-- Infinite Scroll Sentinel -->
-        <div ref="observerTarget" class="w-full py-6 flex justify-center items-center h-12">
-           <span v-if="isLoadingMore" class="text-sm text-[#797676] animate-pulse">Carregando mais produtos...</span>
+        <div
+          ref="observerTarget"
+          class="w-full py-6 flex justify-center items-center h-12"
+        >
+          <span
+            v-if="isLoadingMore"
+            class="text-sm text-[#797676] animate-pulse"
+            >Carregando mais produtos...</span
+          >
         </div>
       </template>
     </main>
@@ -99,7 +123,7 @@
       :is-open="isModalOpen"
       :product="selectedProduct"
       @close="isModalOpen = false"
-      @add-to-cart="handleAddToCartFromModal"
+      @add-to-cart="(p, s) => addToCart(p, 1, s)"
     />
   </div>
 </template>
@@ -113,6 +137,7 @@ import SearchBar from "../../features/showcase/components/SearchBar.vue";
 import CategoryTabs from "../../features/showcase/components/CategoryTabs.vue";
 import ProductCard from "../../features/showcase/components/ProductCard.vue";
 import ProductDetailsModal from "../../features/showcase/components/ProductDetailsModal.vue";
+import HeroBanner from "../../features/showcase/components/HeroBanner.vue";
 
 import { useStore } from "../../features/showcase/composables/useStore";
 import { useProducts } from "../../features/showcase/composables/useProducts";
@@ -127,9 +152,26 @@ const selectedCategoryId = ref("all");
 
 // Load Data
 const { store } = await useStore();
-const { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending } = await useProducts(searchQuery, selectedCategoryId);
+const { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending } =
+  await useProducts(searchQuery, selectedCategoryId);
 
 const { totalItems, addToCart } = useCart();
+
+const handleViewDetails = (product: Product) => {
+  selectedProduct.value = product;
+  isModalOpen.value = true;
+};
+
+const handleAddToCart = (product: Product) => {
+  const hasVariations = product.variationOptions && Object.keys(product.variationOptions).length > 0;
+  
+  if (hasVariations) {
+    selectedProduct.value = product;
+    isModalOpen.value = true; // Força a abertura do modal
+  } else {
+    addToCart(product);
+  }
+};
 
 const categories = computed(() => {
   const store = useStoreStores().getCategories;
@@ -144,21 +186,23 @@ const categories = computed(() => {
 
 const categoriesWithProducts = computed(() => {
   if (!allProducts.value) return [];
-  
+
   const storeCategories = useStoreStores().getCategories;
-  
-  const grouped = storeCategories.map((c: Category) => ({
-    id: c.id,
-    name: c.name,
-    products: allProducts.value.filter((p: Product) => p.categoryId === c.id)
-  })).filter(c => c.products.length > 0);
+
+  const grouped = storeCategories
+    .map((c: Category) => ({
+      id: c.id,
+      name: c.name,
+      products: allProducts.value.filter((p: Product) => p.categoryId === c.id),
+    }))
+    .filter((c) => c.products.length > 0);
 
   const uncategorized = allProducts.value.filter((p: Product) => !p.categoryId);
   if (uncategorized.length > 0) {
     grouped.push({
-      id: 'uncategorized',
-      name: 'Outros',
-      products: uncategorized
+      id: "uncategorized",
+      name: "Outros",
+      products: uncategorized,
     });
   }
 
@@ -175,14 +219,15 @@ let observer: IntersectionObserver | null = null;
 onMounted(() => {
   observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0].isIntersecting && hasMore.value && !isLoadingMore.value) {
+      const entry = entries[0];
+      if (entry?.isIntersecting && hasMore.value && !isLoadingMore.value) {
         loadMore();
       }
     },
-    { rootMargin: "100px" }
+    { rootMargin: "100px" },
   );
 
-  if (observerTarget.value) {
+  if (observerTarget.value && observer) {
     observer.observe(observerTarget.value);
   }
 });
@@ -193,30 +238,6 @@ onUnmounted(() => {
   }
 });
 
-const handleViewDetails = (product: Product) => {
-  selectedProduct.value = product;
-  isModalOpen.value = true;
-};
-
-const handleAddProduct = (product: Product) => {
-  const hasVariations =
-    product.variationOptions &&
-    Object.keys(product.variationOptions).length > 0;
-  if (hasVariations) {
-    handleViewDetails(product);
-  } else {
-    addToCart(product, 1, {});
-    // Opcional: mostrar um toast
-  }
-};
-
-const handleAddToCartFromModal = (
-  product: Product,
-  specs: Record<string, string>,
-) => {
-  addToCart(product, 1, specs);
-  // Opcional: mostrar um toast
-};
 
 const getFontFamily = (fontName: string) => {
   const map: Record<string, string> = {
@@ -255,7 +276,10 @@ useHead({
   }),
   style: [
     { innerHTML: themeVars.value },
-    { innerHTML: '.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }' }
+    {
+      innerHTML:
+        ".hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }",
+    },
   ],
 });
 </script>

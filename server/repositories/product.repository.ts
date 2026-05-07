@@ -22,6 +22,7 @@ function toProduct(db: DbProductWithCategory): Product {
         price: db.price,
         promoPrice: db.promo_price,
         imageUrls: db.image_urls,
+        highlighted: db.highlighted,
         specifications: db.specifications,
         active: db.active,
         variationOptions: db.variation_options,
@@ -31,14 +32,17 @@ function toProduct(db: DbProductWithCategory): Product {
 export function createProductRepository(client: SupabaseClient) {
     return {
         // Vitrine pública: todos os produtos ativos de uma loja
-        async findByStore(storeId: string, options?: { query?: string; categoryId?: string; page?: number; limit?: number }): Promise<Product[]> {
+        async findByStore(storeId: string, options?: { query?: string; categoryId?: string; page?: number; limit?: number, includeInactive?: boolean }): Promise<Product[]> {
             let qb = client
                 .from('products')
                 .select('*, categories(name)')
                 .eq('store_id', storeId)
-                .eq('active', true)
                 .is('deleted_at', null)
                 .order('created_at', { ascending: false })
+
+            if (!options?.includeInactive) {
+                qb = qb.eq('active', true)
+            }
 
             if (options?.categoryId && options.categoryId !== 'all') {
                 qb = qb.eq('category_id', options.categoryId)
@@ -52,7 +56,7 @@ export function createProductRepository(client: SupabaseClient) {
             const limit = options?.limit ?? 5
             const from = (page - 1) * limit
             const to = from + limit - 1
-            
+
             qb = qb.range(from, to)
 
             const result = await qb.returns<DbProductWithCategory[]>()
@@ -117,6 +121,44 @@ export function createProductRepository(client: SupabaseClient) {
 
             return unwrap(result).map(toProduct)
         },
+
+        // Criação de um novo produto (painel do lojista)
+        async create(productData: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>): Promise<Product> {
+            const result = await client
+                .from('products')
+                .insert([productData])
+                .select('*, categories(name)')
+                .returns<DbProductWithCategory[]>()
+                .single()
+
+            return toProduct(unwrap(result))
+        },
+
+        // Atualização de um produto existente (painel do lojista)
+        async update(productId: string, storeId: string, productData: Partial<Omit<DbProduct, 'id' | 'store_id' | 'created_at' | 'deleted_at'>>): Promise<Product> {
+            const result = await client
+                .from('products')
+                .update({ ...productData, updated_at: new Date().toISOString() })
+                .eq('id', productId)
+                .eq('store_id', storeId) // Security: ensure store owns the product
+                .select('*, categories(name)')
+                .returns<DbProductWithCategory[]>()
+                .single()
+
+            return toProduct(unwrap(result))
+        },
+
+        // Exclusão lógica (soft delete) (painel do lojista)
+        async softDelete(productId: string, storeId: string): Promise<void> {
+            const result = await client
+                .from('products')
+                .update({ deleted_at: new Date().toISOString() })
+                .eq('id', productId)
+                .eq('store_id', storeId)
+                .select()
+
+            unwrap(result)
+        }
     }
 }
 

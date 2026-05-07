@@ -99,7 +99,7 @@ const hasSpecs = computed(
 const specsText = computed(() => {
   if (!hasSpecs.value) return "";
   return Object.entries(props.item.selectedSpecs || {})
-    .map(([key, val]) => `${val}`)
-    .join(" / ");
+    .map(([key, val]) => `${key}: ${val}`)
+    .join(" • ");
 });
 </script>

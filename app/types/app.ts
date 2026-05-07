@@ -55,6 +55,7 @@ export interface Product {
     description: string | null
     price: number
     promoPrice: number | null
+    highlighted: boolean
     imageUrls: string[]
     specifications: ProductSpec[]
     variationOptions: ProductVariationOption

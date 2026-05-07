@@ -18,12 +18,12 @@
           shippingFee === 0 ? "Grátis" : formatPrice(shippingFee)
         }}</span>
       </div>
-      <div class="flex justify-between text-[#797676]" v-if="estimatedTax">
+      <!-- <div class="flex justify-between text-[#797676]" v-if="estimatedTax">
         <span>Taxas Estimadas</span>
         <span class="font-medium text-[#1A1A1A]">{{
           formatPrice(estimatedTax)
         }}</span>
-      </div>
+      </div> -->
     </div>
 
     <div class="h-px w-full bg-gray-200 my-1"></div>

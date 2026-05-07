@@ -8,6 +8,10 @@
         :alt="product.name"
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
+      <!-- Badge de Desconto -->
+      <div v-if="discountPercentage" class="absolute top-3 right-3 z-10 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+        -{{ discountPercentage }}%
+      </div>
       <div
         v-else
         class="w-full h-full flex items-center justify-center text-gray-400 text-sm"
@@ -22,9 +26,14 @@
         <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest leading-tight">
           {{ product.name }}
         </h3>
-        <span class="text-sm font-semibold text-primary shrink-0">
-          {{ formattedPrice }}
-        </span>
+        <div class="flex flex-col items-end shrink-0">
+          <span v-if="product.promoPrice" class="text-[10px] text-gray-400 line-through font-bold">
+            {{ formatCurrency(product.price) }}
+          </span>
+          <span class="text-sm font-bold text-primary">
+            {{ formattedPrice }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -65,5 +74,11 @@ defineEmits<{
 const formattedPrice = computed(() => {
   const price = props.product.promoPrice ?? props.product.price;
   return formatCurrency(price);
+});
+
+const discountPercentage = computed(() => {
+  if (!props.product.price || !props.product.promoPrice) return null;
+  const discount = ((props.product.price - props.product.promoPrice) / props.product.price) * 100;
+  return Math.round(discount);
 });
 </script>

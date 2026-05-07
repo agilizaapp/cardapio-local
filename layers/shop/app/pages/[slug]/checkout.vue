@@ -142,7 +142,9 @@ const formState = ref({
 });
 
 const shippingFee = computed(() =>
-  formState.value.deliveryMethod === "home" ? 15 : 0,
+  formState.value.deliveryMethod === "home"
+    ? storeStores.getCurrentStore?.deliveryFee
+    : 0,
 );
 // Simulando uma taxa de imposto caso queira exibir
 const estimatedTax = computed(() => subtotal.value * 0.08);
