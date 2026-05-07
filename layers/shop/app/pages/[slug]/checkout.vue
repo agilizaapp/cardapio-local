@@ -292,7 +292,7 @@ const handleManualRefresh = async () => {
 
 const handleNewOrder = () => {
   clearOrderId();
-  window.location.reload();
+  navigateTo(`/${route.params.slug}`);
 };
 
 const statusLabel = computed(() => {

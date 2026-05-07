@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
     // Converter de camelCase para snake_case antes de enviar para o banco
     const dbData: any = {}
     if (body.name !== undefined) dbData.name = body.name
+    if (body.slug !== undefined) dbData.slug = body.slug
     if (body.pixKey !== undefined) dbData.pix_key = body.pixKey
     if (body.logoUrl !== undefined) dbData.logo_url = body.logoUrl
     if (body.whatsapp !== undefined) dbData.whatsapp = body.whatsapp

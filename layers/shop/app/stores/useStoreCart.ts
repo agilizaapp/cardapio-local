@@ -1,3 +1,4 @@
+import { calculateItemUnitPrice } from '~/utils/product'
 import type { CartItem } from '~/types/app'
 
 export const useStoreCart = defineStore('shop:cart', () => {
@@ -9,8 +10,9 @@ export const useStoreCart = defineStore('shop:cart', () => {
 
   const subtotal = computed(() => {
     return items.value.reduce((acc, item) => {
-      const price = item.product.promoPrice ?? item.product.price
-      return acc + (price * item.quantity)
+      const basePrice = item.product.promoPrice ?? item.product.price
+      const unitPrice = calculateItemUnitPrice(basePrice, item.selectedSpecs)
+      return acc + (unitPrice * item.quantity)
     }, 0)
   })
 

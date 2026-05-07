@@ -165,6 +165,7 @@
 import { ref, computed, watch } from "vue";
 import type { Product } from "~/types/app";
 import { formatCurrency } from "~~/app/utils/currency";
+import { calculateItemUnitPrice } from "~~/app/utils/product";
 import Button from "~/components/ui/Button.vue";
 import Card from "~/components/ui/Card.vue";
 
@@ -187,8 +188,9 @@ const selectedSpecs = ref<Record<string, any>>({});
 
 const formattedPrice = computed(() => {
   if (!props.product) return "";
-  const price = props.product.promoPrice ?? props.product.price;
-  return formatCurrency(price);
+  const basePrice = props.product.promoPrice ?? props.product.price;
+  const total = calculateItemUnitPrice(basePrice, selectedSpecs.value);
+  return formatCurrency(total);
 });
 
 const variationGroups = computed(() => {

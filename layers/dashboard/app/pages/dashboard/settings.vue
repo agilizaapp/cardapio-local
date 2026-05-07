@@ -52,6 +52,21 @@
               class="w-full bg-gray-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-100 outline-none font-medium"
             />
           </div>
+          <div class="space-y-1.5 opacity-60">
+            <label
+              class="text-xs font-black text-gray-400 uppercase tracking-widest"
+              >Slug da Loja (URL)</label
+            >
+            <div class="flex items-center bg-gray-100 rounded-2xl p-4 gap-2">
+              <span class="text-xs font-bold text-gray-400">suaplataforma.com/</span>
+              <input
+                v-model="storeForm.slug"
+                type="text"
+                disabled
+                class="bg-transparent border-none p-0 outline-none font-bold text-sm text-gray-600 flex-1"
+              />
+            </div>
+          </div>
           <div class="space-y-1.5">
             <label
               class="text-xs font-black text-gray-400 uppercase tracking-widest"
@@ -371,6 +386,7 @@ const applyPreset = (preset: typeof colorPresets[0]) => {
 
 const storeForm = ref<any>({
   name: "",
+  slug: "",
   pixKey: "",
   whatsapp: "",
   openHours: {
@@ -390,6 +406,27 @@ const storeForm = ref<any>({
   },
 });
 
+const generateSlug = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+    .trim()
+    .replace(/\s+/g, "-") // Espaços por -
+    .replace(/[^\w-]+/g, "") // Remove caracteres especiais
+    .replace(/--+/g, "-"); // Evita --
+};
+
+watch(
+  () => storeForm.value.name,
+  (newName) => {
+    if (newName) {
+      storeForm.value.slug = generateSlug(newName);
+    }
+  }
+);
+
 const messageForm = ref<any>({
   pending: "",
   confirmed: "",
@@ -408,6 +445,7 @@ const fetchData = async () => {
     if (res.success && res.data) {
       storeForm.value = {
         name: res.data.name || "",
+        slug: res.data.slug || "",
         pixKey: res.data.pixKey || "",
         whatsapp: res.data.whatsapp || "",
         openHours: res.data.openHours || {
@@ -422,7 +460,8 @@ const fetchData = async () => {
         themeSettings: {
           primaryColor: res.data.themeSettings?.primaryColor || "#000000",
           bgPrimaryColor: res.data.themeSettings?.primary_bg_color || "#ffffff",
-          bgSecondaryColor: res.data.themeSettings?.secondary_bg_color || "#f9fafb",
+          bgSecondaryColor:
+            res.data.themeSettings?.secondary_bg_color || "#f9fafb",
           font: res.data.themeSettings?.font || "inter",
         },
       };
