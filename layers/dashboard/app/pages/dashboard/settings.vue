@@ -58,7 +58,9 @@
               >Slug da Loja (URL)</label
             >
             <div class="flex items-center bg-gray-100 rounded-2xl p-4 gap-2">
-              <span class="text-xs font-bold text-gray-400">suaplataforma.com/</span>
+              <span class="text-xs font-bold text-gray-400"
+                >suaplataforma.com/</span
+              >
               <input
                 v-model="storeForm.slug"
                 type="text"
@@ -94,15 +96,21 @@
         </div>
 
         <div class="space-y-4">
-          <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">Horário de Funcionamento</label>
+          <label
+            class="text-xs font-black text-gray-400 uppercase tracking-widest block"
+            >Horário de Funcionamento</label
+          >
           <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            <div 
-              v-for="(dayName, dayKey) in daysMap" 
+            <div
+              v-for="(dayName, dayKey) in daysMap"
               :key="dayKey"
               class="bg-gray-50 p-3 rounded-2xl border border-gray-100 flex flex-col gap-2"
             >
-              <span class="text-[10px] font-black text-gray-400 uppercase tracking-tight">{{ dayName }}</span>
-              <input 
+              <span
+                class="text-[10px] font-black text-gray-400 uppercase tracking-tight"
+                >{{ dayName }}</span
+              >
+              <input
                 v-model="storeForm.openHours[dayKey]"
                 type="text"
                 placeholder="09:00-18:00"
@@ -110,7 +118,9 @@
               />
             </div>
           </div>
-          <p class="text-[10px] text-gray-400">Dica: Use "fechado" para dias sem atendimento.</p>
+          <p class="text-[10px] text-gray-400">
+            Dica: Use "fechado" para dias sem atendimento.
+          </p>
         </div>
       </div>
     </div>
@@ -127,20 +137,34 @@
 
         <!-- Paletas Sugeridas -->
         <div class="space-y-4">
-          <label class="text-xs font-black text-gray-400 uppercase tracking-widest block">Paletas Sugeridas</label>
+          <label
+            class="text-xs font-black text-gray-400 uppercase tracking-widest block"
+            >Paletas Sugeridas</label
+          >
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button 
-              v-for="preset in colorPresets" 
+            <button
+              v-for="preset in colorPresets"
               :key="preset.name"
               @click="applyPreset(preset)"
               type="button"
               class="flex flex-col gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50 hover:bg-white hover:border-purple-200 transition-all group"
             >
-              <span class="text-xs font-bold text-gray-700">{{ preset.name }}</span>
+              <span class="text-xs font-bold text-gray-700">{{
+                preset.name
+              }}</span>
               <div class="flex gap-1">
-                <div class="w-6 h-6 rounded-full border border-black/5" :style="{ backgroundColor: preset.primary }"></div>
-                <div class="w-6 h-6 rounded-full border border-black/5" :style="{ backgroundColor: preset.bgPrimary }"></div>
-                <div class="w-6 h-6 rounded-full border border-black/5" :style="{ backgroundColor: preset.bgSecondary }"></div>
+                <div
+                  class="w-6 h-6 rounded-full border border-black/5"
+                  :style="{ backgroundColor: preset.primary }"
+                ></div>
+                <div
+                  class="w-6 h-6 rounded-full border border-black/5"
+                  :style="{ backgroundColor: preset.bgPrimary }"
+                ></div>
+                <div
+                  class="w-6 h-6 rounded-full border border-black/5"
+                  :style="{ backgroundColor: preset.bgSecondary }"
+                ></div>
               </div>
             </button>
           </div>
@@ -205,7 +229,8 @@
                 >Cor de Fundo Secundária</label
               >
               <p class="text-xs text-gray-500 mb-4">
-                Cor usada em seções, banners ou fundos alternativos (ex: #F9FAFB).
+                Cor usada em seções, banners ou fundos alternativos (ex:
+                #F9FAFB).
               </p>
             </div>
             <div class="flex items-center gap-4">
@@ -262,7 +287,7 @@
     </div>
 
     <!-- Tab Content: Status Messages -->
-    <div v-if="activeTab === 'messages'" class="space-y-6">
+    <!-- <div v-if="activeTab === 'messages'" class="space-y-6">
       <div
         class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm space-y-6"
       >
@@ -308,7 +333,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -339,7 +364,7 @@ const daysMap = {
 const tabs = [
   { id: "store", label: "Loja" },
   { id: "appearance", label: "Aparência" },
-  { id: "messages", label: "Mensagens Automáticas" },
+  // { id: "messages", label: "Mensagens Automáticas" },
 ];
 
 const statusList = [
@@ -377,7 +402,7 @@ const colorPresets = [
   },
 ];
 
-const applyPreset = (preset: typeof colorPresets[0]) => {
+const applyPreset = (preset: (typeof colorPresets)[0]) => {
   storeForm.value.themeSettings.primaryColor = preset.primary;
   storeForm.value.themeSettings.secondaryColor = preset.secondary;
   storeForm.value.themeSettings.bgPrimaryColor = preset.bgPrimary;
@@ -424,7 +449,7 @@ watch(
     if (newName) {
       storeForm.value.slug = generateSlug(newName);
     }
-  }
+  },
 );
 
 const messageForm = ref<any>({

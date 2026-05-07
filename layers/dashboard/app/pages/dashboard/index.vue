@@ -1,27 +1,54 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-900">Visão Geral</h2>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900">Visão Geral</h2>
+        <p class="text-sm text-gray-500 mt-1">Acompanhe o desempenho da sua loja</p>
+      </div>
       
-      <button 
-        @click="manualRefresh" 
-        :disabled="cooldownRemaining > 0 || pending"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition shadow-sm border border-gray-200"
-        :class="cooldownRemaining > 0 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'"
-      >
-        <svg 
-          class="w-4 h-4" 
-          :class="{ 'animate-spin': pending }"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <!-- Filtros de Data -->
+        <div class="flex items-center bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+          <button 
+            v-for="opt in filterOptions" 
+            :key="opt.id"
+            @click="activeFilter = opt.id"
+            class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all"
+            :class="activeFilter === opt.id ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+
+        <!-- Seletor de Data Customizada -->
+        <div v-if="activeFilter === 'custom'" class="relative">
+          <input 
+            v-model="customDate" 
+            type="date" 
+            class="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-200 rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          />
+        </div>
+
+        <button 
+          @click="manualRefresh" 
+          :disabled="cooldownRemaining > 0 || pending"
+          class="flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold text-xs transition shadow-sm border border-gray-200"
+          :class="cooldownRemaining > 0 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <span>
-          {{ cooldownRemaining > 0 ? `Aguarde ${cooldownRemaining}s` : 'Atualizar' }}
-        </span>
-      </button>
+          <svg 
+            class="w-3.5 h-3.5" 
+            :class="{ 'animate-spin': pending }"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>
+            {{ cooldownRemaining > 0 ? `Aguarde ${cooldownRemaining}s` : 'Atualizar' }}
+          </span>
+        </button>
+      </div>
     </div>
     
     <div v-if="pending && !stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
@@ -29,17 +56,17 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
         <h3 class="text-sm font-medium text-gray-500 mb-1">Vendas Concluídas</h3>
         <p class="text-3xl font-bold text-gray-900">
           {{ formatCurrency(stats?.totalSales || 0) }}
         </p>
       </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
         <h3 class="text-sm font-medium text-gray-500 mb-1">Pedidos Pendentes</h3>
         <p class="text-3xl font-bold text-gray-900">{{ stats?.pendingOrders || 0 }}</p>
       </div>
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
         <h3 class="text-sm font-medium text-gray-500 mb-1">Total de Pedidos</h3>
         <p class="text-3xl font-bold text-gray-900">{{ stats?.totalOrders || 0 }}</p>
       </div>
@@ -58,9 +85,23 @@ useHead({ title: 'Visão Geral - Dashboard' })
 
 const { storeId } = useAdminAuth()
 
+// Filtros
+const activeFilter = ref('today')
+const customDate = ref(new Date().toISOString().split('T')[0])
+const filterOptions = [
+  { id: 'today', label: 'Hoje' },
+  { id: 'yesterday', label: 'Ontem' },
+  { id: 'all', label: 'Todos' },
+  { id: 'custom', label: 'Data' },
+]
+
 const { data: stats, pending, refresh } = await useFetch('/api/admin/stats', {
-  query: { storeId },
-  watch: [storeId]
+  query: { 
+    storeId, 
+    filter: activeFilter, 
+    date: customDate 
+  },
+  watch: [storeId, activeFilter, customDate]
 })
 
 // Lógica de Cooldown e Refresh Manual

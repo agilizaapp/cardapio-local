@@ -144,28 +144,30 @@ export function createOrderRepository(client: SupabaseClient) {
             return mapToOrder(unwrap(result))
         },
 
-        async getStats(storeId: string) {
-            // 1. Total de vendas (pedidos entregues) - Valor total
-            const { data: salesData } = await client
-                .from('orders')
-                .select('total')
-                .eq('store_id', storeId)
-                .eq('status', 'delivered')
+        async getStats(storeId: string, startDate?: string, endDate?: string) {
+            const applyFilters = (q: any) => {
+                let filtered = q.eq('store_id', storeId)
+                if (startDate) filtered = filtered.gte('created_at', startDate)
+                if (endDate) filtered = filtered.lte('created_at', endDate)
+                return filtered
+            }
 
-            const totalSales = salesData?.reduce((acc, curr) => acc + Number(curr.total), 0) || 0
+            // 1. Total de vendas (pedidos entregues) - Valor total
+            const { data: salesData } = await applyFilters(
+                client.from('orders').select('total')
+            ).eq('status', 'delivered')
+
+            const totalSales = salesData?.reduce((acc: any, curr: any) => acc + Number(curr.total), 0) || 0
 
             // 2. Quantidade total de pedidos
-            const { count: totalOrders } = await client
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .eq('store_id', storeId)
+            const { count: totalOrders } = await applyFilters(
+                client.from('orders').select('*', { count: 'exact', head: true })
+            )
 
             // 3. Pedidos pendentes
-            const { count: pendingOrders } = await client
-                .from('orders')
-                .select('*', { count: 'exact', head: true })
-                .eq('store_id', storeId)
-                .eq('status', 'pending')
+            const { count: pendingOrders } = await applyFilters(
+                client.from('orders').select('*', { count: 'exact', head: true })
+            ).eq('status', 'pending')
 
             return {
                 totalSales,
