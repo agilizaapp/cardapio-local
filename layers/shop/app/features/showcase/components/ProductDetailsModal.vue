@@ -19,7 +19,7 @@
         @click="close"
         variant="ghost"
         size="icon"
-        class="absolute top-4 right-4 rounded-full z-20"
+        class="absolute top-4 right-4 rounded-full z-20 !bg-gray-300"
         style="background-color: var(--bg-surface); color: var(--text-muted)"
       >
         <svg
