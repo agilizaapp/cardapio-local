@@ -12,6 +12,16 @@ async function getMyStores(supabase: SupabaseClient) {
     return await repository.findMyStores()
 }
 
+async function getStoreById(supabase: SupabaseClient, id: string) {
+    const repository = createStoreRepository(supabase)
+    return await repository.findById(id)
+}
+
+async function updateStore(supabase: SupabaseClient, id: string, data: any) {
+    const repository = createStoreRepository(supabase)
+    return await repository.update(id, data)
+}
+
 async function getCategoriesByStoreId(supabase: SupabaseClient, storeId: string) {
     const repository = createStoreRepository(supabase)
     return await repository.getCategoriesByStoreId(storeId)
@@ -19,6 +29,8 @@ async function getCategoriesByStoreId(supabase: SupabaseClient, storeId: string)
 
 export const storeService = {
     getStoreBySlug,
+    getStoreById,
+    updateStore,
     getMyStores,
     getCategoriesByStoreId
 }

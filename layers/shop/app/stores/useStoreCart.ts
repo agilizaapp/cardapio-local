@@ -14,7 +14,7 @@ export const useStoreCart = defineStore('shop:cart', () => {
     }, 0)
   })
 
-  const getCartItemId = (productId: string, specs: Record<string, string> = {}) => {
+  const getCartItemId = (productId: string, specs: Record<string, string | string[]> = {}) => {
     return `${productId}-${JSON.stringify(specs)}`
   }
 
@@ -37,12 +37,12 @@ export const useStoreCart = defineStore('shop:cart', () => {
     }
   }
 
-  const removeItem = (productId: string, specs: Record<string, string> = {}) => {
+  const removeItem = (productId: string, specs: Record<string, string | string[]> = {}) => {
     const itemId = getCartItemId(productId, specs)
     items.value = items.value.filter(i => getCartItemId(i.product.id, i.selectedSpecs) !== itemId)
   }
 
-  const updateQuantity = (productId: string, specs: Record<string, string> = {}, quantity: number) => {
+  const updateQuantity = (productId: string, specs: Record<string, string | string[]> = {}, quantity: number) => {
     const itemId = getCartItemId(productId, specs)
     const item = items.value.find(i => getCartItemId(i.product.id, i.selectedSpecs) === itemId)
     if (item) {

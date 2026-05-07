@@ -1,20 +1,26 @@
 <template>
-  <div class="bg-gray-50 rounded-xl p-5 flex flex-col gap-4">
-    <h3 class="text-lg font-bold text-[#1A1A1A]">Resumo do Pedido</h3>
+  <div
+    class="rounded-xl p-5 flex flex-col gap-4"
+    style="background-color: var(--bg-secondary)"
+  >
+    <h3 class="text-lg font-bold" style="color: currentColor">
+      Resumo do Pedido
+    </h3>
 
     <div class="flex flex-col gap-2 text-sm">
-      <div class="flex justify-between text-[#797676]">
+      <div class="flex justify-between opacity-50" style="color: currentColor">
         <span>Subtotal</span>
-        <span class="font-medium text-[#1A1A1A]">{{
+        <span class="font-medium" style="color: currentColor">{{
           formatPrice(subtotal)
         }}</span>
       </div>
       <div
-        class="flex justify-between text-[#797676]"
+        class="flex justify-between opacity-50"
         v-if="shippingFee !== undefined"
+        style="color: currentColor"
       >
         <span>Frete</span>
-        <span class="font-medium text-[#1A1A1A]">{{
+        <span class="font-medium" style="color: currentColor">{{
           shippingFee === 0 ? "Grátis" : formatPrice(shippingFee)
         }}</span>
       </div>
@@ -26,10 +32,11 @@
       </div> -->
     </div>
 
-    <div class="h-px w-full bg-gray-200 my-1"></div>
+    <div class="h-px w-full bg-white/10 my-1"></div>
 
     <div
-      class="flex justify-between items-center text-lg font-bold text-[#1A1A1A]"
+      class="flex justify-between items-center text-lg font-bold"
+      style="color: currentColor"
     >
       <span>Total</span>
       <span>{{ formatPrice(total) }}</span>
@@ -38,9 +45,9 @@
     <div class="mt-4 flex flex-col gap-3">
       <!-- Pay Online omitido por hora conforme acordado -->
 
-      <button
+      <Button
         @click="$emit('submit')"
-        class="w-full bg-[#1A1A1A] text-white py-3.5 rounded flex items-center justify-center gap-2 font-bold tracking-wider text-sm uppercase hover:bg-black transition-colors"
+        class="w-full text-sm uppercase tracking-wider h-14"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +66,7 @@
           ></path>
         </svg>
         Finalizar via WhatsApp
-      </button>
+      </Button>
 
       <div
         class="flex items-center justify-center gap-1.5 text-xs text-[#797676] mt-2"
@@ -87,6 +94,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { formatCurrency } from "~/utils/currency";
+import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{
   subtotal: number;

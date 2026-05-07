@@ -76,7 +76,7 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
     } else {
         // ESTRATÉGIA CLIENT-SIDE: Busca tudo, filtra local, exibe de forma progressiva (lazy load)
         const storeProducts = useStoreProducts()
-        const renderedCount = ref(3) // Começa mostrando apenas 3 para não travar o carregamento inicial
+        const renderedCount = ref(12) // Começa mostrando uma grade completa (12)
         const pending = ref(false)
 
         // Cache inteligente: Verifica se o Pinia já possui os dados (navegação de volta do carrinho)
@@ -124,7 +124,7 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
 
         // Resetar o contador de exibição quando o usuário filtrar/pesquisar
         watch([query, categoryId], () => {
-            renderedCount.value = 3
+            renderedCount.value = 12
             updateClientList()
         })
 
@@ -135,7 +135,7 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
             // Adiciona um pequeno delay de UI para simular o carregamento suave
             await new Promise(resolve => setTimeout(resolve, 300))
             
-            renderedCount.value += 5 // Mostra mais 5 a cada scroll
+            renderedCount.value += 8 // Mostra mais 8 a cada scroll
             updateClientList()
             isLoadingMore.value = false
         }

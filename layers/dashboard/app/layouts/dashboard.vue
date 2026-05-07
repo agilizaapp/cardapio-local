@@ -28,7 +28,7 @@
       </nav>
       <div class="p-4 border-t border-gray-200">
         <div v-if="user" class="text-sm font-medium text-gray-900 mb-2 truncate" :title="user.email">{{ user.email }}</div>
-        <button @click="logout" class="w-full text-left text-sm text-red-600 hover:text-red-800 font-medium py-1">Sair da conta</button>
+        <button @click="logout" class="w-full justify-start text-sm text-red-600 hover:text-red-800 hover:bg-red-50 font-medium py-1 h-auto">Sair da conta</button>
       </div>
     </aside>
 
@@ -36,7 +36,7 @@
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
         <div class="flex items-center gap-3">
-          <button @click="isMobileMenuOpen = true" class="md:hidden p-2 text-gray-600 -ml-2">
+          <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="p-2 -ml-2 text-gray-600 md:hidden">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
           </button>
           <span class="text-sm font-medium text-gray-500 hidden sm:inline">Loja:</span>

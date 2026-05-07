@@ -106,7 +106,7 @@
                   <span class="ml-2 text-gray-700">{{ item.productName }}</span>
                   <div v-if="item.specsSnapshot && Object.keys(item.specsSnapshot).length > 0" class="mt-1 flex flex-wrap gap-1">
                     <span v-for="(val, key) in item.specsSnapshot" :key="key" class="bg-white px-1.5 py-0.5 rounded border border-gray-100 text-[9px] text-gray-400 font-medium">
-                      {{ key }}: {{ val }}
+                      {{ key }}: {{ Array.isArray(val) ? val.join(', ') : val }}
                     </span>
                   </div>
                 </div>

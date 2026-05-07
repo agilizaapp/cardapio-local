@@ -1,22 +1,25 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
   >
     <!-- Backdrop -->
     <div
-      class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
       @click="close"
     />
 
     <!-- Modal Content -->
     <Card
-      class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row gap-6 p-6 z-10 animate-in fade-in zoom-in-95 duration-300"
+      class="relative w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row rounded-3xl shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-300 border-white/10"
+      style="background-color: var(--bg-primary); color: var(--text-main)"
     >
       <!-- Close Button -->
-      <button
+      <Button
         @click="close"
-        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 rounded-full transition-all active:scale-90"
+        variant="ghost"
+        size="icon"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 rounded-full z-20"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +28,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="2.5"
           stroke-linecap="round"
           stroke-linejoin="round"
         >
@@ -34,10 +37,8 @@
         </svg>
       </button>
 
-      <!-- Image -->
-      <div
-        class="w-full md:w-1/2 aspect-square bg-gray-100 rounded-lg overflow-hidden flex-shrink-0"
-      >
+      <!-- Image Section -->
+      <div class="w-full md:w-1/2 h-64 md:h-auto flex-shrink-0" style="background-color: var(--bg-secondary)">
         <img
           v-if="product?.imageUrls?.length"
           :src="product.imageUrls[0]"
@@ -46,92 +47,113 @@
         />
         <div
           v-else
-          class="w-full h-full flex items-center justify-center text-gray-400"
+          class="w-full h-full flex items-center justify-center text-gray-300"
         >
-          Sem Imagem
+          <svg
+            class="w-12 h-12"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            ></path>
+          </svg>
         </div>
       </div>
 
-      <!-- Details -->
-      <div class="w-full md:w-1/2 flex flex-col">
-        <h2
-          class="text-2xl font-black text-gray-900 uppercase tracking-widest leading-tight mb-2"
-        >
-          {{ product?.name }}
-        </h2>
-        <div class="flex justify-between items-center mb-4">
-          <span class="text-xl text-primary font-bold">
-            {{ formattedPrice }}
-          </span>
-          <span
-            v-if="product?.stock !== undefined"
-            :class="[
-              'text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border',
-              (product.stock || 0) > 0
-                ? 'text-green-600 border-green-100 bg-green-50'
-                : 'text-red-600 border-red-100 bg-red-50',
-            ]"
-          >
-            {{
-              (product.stock || 0) > 0
-                ? `${product.stock} em estoque`
-                : "Esgotado"
-            }}
-          </span>
+      <!-- Content Section -->
+      <div class="w-full md:w-1/2 flex flex-col p-6 md:p-8 overflow-y-auto">
+        <div class="mb-6">
+          <div class="flex justify-between items-start mb-2">
+            <h2
+              class="text-2xl font-black uppercase italic tracking-tighter leading-none"
+              style="color: currentColor"
+            >
+              {{ product?.name }}
+            </h2>
+          </div>
+          <p class="text-sm text-gray-500 leading-relaxed">
+            {{ product?.description || "Sem descrição disponível." }}
+          </p>
         </div>
 
-        <p class="text-sm text-gray-500 leading-relaxed mb-6 flex-1">
-          {{
-            product?.description ||
-            "Sem descrição disponível para este produto."
-          }}
-        </p>
-
         <!-- Variations -->
-        <div v-if="hasVariations" class="flex flex-col gap-4 mb-6">
+        <div v-if="hasVariations" class="space-y-8 mb-8">
           <div
-            v-for="(options, key) in product?.variationOptions"
-            :key="key"
-            class="flex flex-col gap-2"
+            v-for="(group, idx) in variationGroups"
+            :key="idx"
+            class="space-y-3"
           >
-            <label
-              class="text-xs font-bold text-gray-900 uppercase tracking-widest"
-              >{{ key }}</label
-            >
+            <div class="flex justify-between items-center">
+              <label
+                class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]"
+              >
+                {{ group.name }}
+              </label>
+              <span
+                v-if="group.required"
+                class="text-[9px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase tracking-widest border border-red-100"
+              >
+                Obrigatório
+              </span>
+              <span
+                v-else-if="group.limit"
+                class="text-[9px] font-black bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase tracking-widest border border-blue-100"
+              >
+                Até {{ group.limit }} opções
+              </span>
+            </div>
+
             <div class="flex flex-wrap gap-2">
-              <button
-                v-for="option in options"
+              <Button
+                v-for="option in group.options"
                 :key="option"
-                @click="selectedSpecs[key] = option"
-                :class="
-                  cn(
-                    'px-4 py-2 text-sm font-semibold border rounded-xl transition-all duration-300 active:scale-95',
-                    selectedSpecs[key] === option
-                      ? 'border-primary bg-primary text-white shadow-md shadow-primary/20'
-                      : 'border-black/5 bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900',
-                  )
+                @click="
+                  toggleOption(group.name, option, !!group.multi, group.limit)
                 "
+                :variant="
+                  isOptionSelected(group.name, option) ? 'default' : 'outline'
+                "
+                class="px-4 py-2.5 text-xs font-bold rounded-xl border transition-all duration-300"
               >
                 {{ option }}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
-        <!-- Add to Cart -->
-        <div class="flex flex-col gap-3 mt-auto pt-4 border-t border-gray-100">
+        <!-- Footer -->
+        <div class="mt-auto pt-6 border-t border-white/10 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <span
+              class="text-xs font-bold opacity-40 uppercase tracking-widest"
+              >Total do item</span
+            >
+            <span
+              class="text-2xl font-black italic tracking-tighter"
+              style="color: currentColor"
+              >{{ formattedPrice }}</span
+            >
+          </div>
+
           <Button
             @click="handleAddToCart"
-            class="w-full h-12 uppercase tracking-widest font-bold"
-            :disabled="!allSpecsSelected || (product?.stock || 0) <= 0"
+            class="w-full h-14 rounded-2xl transition-all transform active:scale-[0.98] disabled:opacity-30 disabled:grayscale"
+            :disabled="!canAddToCart || (product?.stock || 0) <= 0"
           >
-            {{
-              (product?.stock || 0) <= 0
-                ? "Produto Esgotado"
-                : allSpecsSelected
-                  ? "Adicionar ao Carrinho"
-                  : "Selecione as opções"
-            }}
+            <span class="uppercase font-black tracking-widest text-xs">
+              {{
+                (product?.stock || 0) <= 0
+                  ? "Produto Esgotado"
+                  : canAddToCart
+                    ? "Adicionar ao Carrinho"
+                    : "Selecione as opções"
+              }}
+            </span>
           </Button>
         </div>
       </div>
@@ -145,7 +167,6 @@ import type { Product } from "~/types/app";
 import { formatCurrency } from "~~/app/utils/currency";
 import Button from "~/components/ui/Button.vue";
 import Card from "~/components/ui/Card.vue";
-import { cn } from "~/utils/cn";
 
 const props = defineProps<{
   isOpen: boolean;
@@ -154,10 +175,15 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "add-to-cart", product: Product, specs: Record<string, string>): void;
+  (
+    e: "add-to-cart",
+    product: Product,
+    specs: Record<string, string | string[]>,
+  ): void;
 }>();
 
-const selectedSpecs = ref<Record<string, string>>({});
+// State: Cada chave é o nome do grupo, o valor pode ser string ou string[]
+const selectedSpecs = ref<Record<string, any>>({});
 
 const formattedPrice = computed(() => {
   if (!props.product) return "";
@@ -165,32 +191,76 @@ const formattedPrice = computed(() => {
   return formatCurrency(price);
 });
 
-const hasVariations = computed(() => {
-  return (
-    props.product?.variationOptions &&
-    Object.keys(props.product.variationOptions).length > 0
+const variationGroups = computed(() => {
+  if (!props.product?.variationOptions) return [];
+  // Se for um array de objetos (novo formato)
+  if (Array.isArray(props.product.variationOptions)) {
+    return props.product.variationOptions;
+  }
+  // Fallback para o formato antigo (Record<string, string[]>)
+  return Object.entries(props.product.variationOptions).map(
+    ([name, options]) => ({
+      name,
+      options,
+      required: true,
+      multi: false,
+    }),
   );
 });
 
-const allSpecsSelected = computed(() => {
-  if (!hasVariations.value) return true;
-  if (!props.product?.variationOptions) return true;
+const hasVariations = computed(() => variationGroups.value.length > 0);
 
-  const requiredKeys = Object.keys(props.product.variationOptions);
-  return requiredKeys.every((key) => !!selectedSpecs.value[key]);
+const isOptionSelected = (groupName: string, option: string) => {
+  const val = selectedSpecs.value[groupName];
+  if (Array.isArray(val)) return val.includes(option);
+  return val === option;
+};
+
+const toggleOption = (
+  groupName: string,
+  option: string,
+  multi: boolean,
+  limit?: number,
+) => {
+  if (multi) {
+    if (!Array.isArray(selectedSpecs.value[groupName])) {
+      selectedSpecs.value[groupName] = [];
+    }
+    const current = [...selectedSpecs.value[groupName]];
+    const idx = current.indexOf(option);
+
+    if (idx > -1) {
+      current.splice(idx, 1);
+    } else {
+      if (!limit || current.length < limit) {
+        current.push(option);
+      }
+    }
+    selectedSpecs.value[groupName] = current;
+  } else {
+    selectedSpecs.value[groupName] = option;
+  }
+};
+
+const canAddToCart = computed(() => {
+  if (!hasVariations.value) return true;
+
+  return variationGroups.value.every((group) => {
+    if (!group.required) return true;
+    const val = selectedSpecs.value[group.name];
+    if (Array.isArray(val)) return val.length > 0;
+    return !!val;
+  });
 });
 
 watch(
   () => props.product,
   (newProduct) => {
-    // Reset selected specs when product changes
     selectedSpecs.value = {};
-
-    // Auto-select if there's only one option
     if (newProduct?.variationOptions) {
-      Object.entries(newProduct.variationOptions).forEach(([key, options]) => {
-        if (options.length === 1) {
-          selectedSpecs.value[key] = options[0] as string;
+      variationGroups.value.forEach((group) => {
+        if (group.options?.length === 1 && group.required) {
+          selectedSpecs.value[group.name] = group.options[0];
         }
       });
     }
@@ -202,7 +272,7 @@ const close = () => {
 };
 
 const handleAddToCart = () => {
-  if (props.product && allSpecsSelected.value) {
+  if (props.product && canAddToCart.value) {
     emit("add-to-cart", props.product, { ...selectedSpecs.value });
     close();
   }

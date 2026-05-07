@@ -110,35 +110,8 @@
       </div>
 
       <!-- Variações -->
-      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-        <div class="flex justify-between items-center border-b pb-2">
-          <h3 class="text-lg font-semibold text-gray-900">Variações (Ex: Tamanhos, Cores)</h3>
-        </div>
-        <div class="space-y-4">
-          <div v-for="(options, key) in form.variationOptions" :key="key" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div class="flex justify-between mb-2">
-              <span class="font-medium text-gray-800">{{ key }}</span>
-              <button @click.prevent="removeVariation(key)" class="text-red-500 text-sm hover:underline">Remover</button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span v-for="opt in options" :key="opt" class="bg-white px-3 py-1 rounded-full text-sm border shadow-sm">{{ opt }}</span>
-            </div>
-          </div>
-
-          <div class="flex flex-col md:flex-row gap-3 items-start md:items-end">
-            <div class="w-full md:flex-1">
-              <label class="block text-xs text-gray-500 mb-1">Nome (Ex: Tamanho)</label>
-              <input v-model="newVarName" type="text" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm" />
-            </div>
-            <div class="w-full md:flex-1">
-              <label class="block text-xs text-gray-500 mb-1">Opções (Separadas por vírgula)</label>
-              <input v-model="newVarOptions" type="text" placeholder="P, M, G" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm" />
-            </div>
-            <button @click.prevent="addVariation" class="w-full md:w-auto bg-gray-200 text-gray-800 px-4 py-2 md:py-1.5 rounded-lg text-sm font-medium hover:bg-gray-300">
-              Adicionar
-            </button>
-          </div>
-        </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <VariationManager v-model="form.variationOptions" />
       </div>
 
       <div class="flex justify-end gap-4 mt-8">
@@ -169,19 +142,6 @@
         </div>
       </div>
     </div>
-    <!-- Modal Nova Variação -->
-    <UiBaseModal
-      :is-open="showVariationModal"
-      title="Nova Variação"
-      confirm-text="Adicionar"
-      @close="showVariationModal = false"
-      @confirm="handleConfirmVariation"
-    >
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Variação (Ex: Cor, Tamanho, Voltagem)</label>
-        <input v-model="newVariationName" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="Ex: Tamanho" @keyup.enter="handleConfirmVariation" />
-      </div>
-    </UiBaseModal>
   </div>
 </template>
 
@@ -191,6 +151,7 @@ import { useRouter } from 'vue-router'
 import { useAdminAuth } from '../../../composables/useAdminAuth'
 import { useSupabaseClient } from '#imports'
 import { useUiStore } from '../../../stores/useUi'
+import VariationManager from '../../../components/products/VariationManager.vue'
 
 const ui = useUiStore()
 
@@ -262,12 +223,9 @@ const form = ref({
   categoryId: null as string | null,
   active: true,
   highlighted: false,
-  variationOptions: {} as Record<string, string[]>,
+  variationOptions: [] as any[],
   imageUrls: [] as string[]
 })
-
-const newVarName = ref('')
-const newVarOptions = ref('')
 
 const selectedImages = ref<File[]>([])
 const imagePreviews = ref<string[]>([])
@@ -282,33 +240,20 @@ const handleImageSelect = (e: Event) => {
             break
         }
         const file = files[i]
-        selectedImages.value.push(file)
-        imagePreviews.value.push(URL.createObjectURL(file))
+        if (file) {
+            selectedImages.value.push(file)
+            imagePreviews.value.push(URL.createObjectURL(file))
+        }
     }
     // Reseta o input para permitir selecionar a mesma imagem se o usuário deletou
     ;(e.target as HTMLInputElement).value = ''
 }
 
 const removeImage = (index: number) => {
-    URL.revokeObjectURL(imagePreviews.value[index])
+    const url = imagePreviews.value[index]
+    if (url) URL.revokeObjectURL(url)
     selectedImages.value.splice(index, 1)
     imagePreviews.value.splice(index, 1)
-}
-
-const addVariation = () => {
-  if (!newVarName.value || !newVarOptions.value) return
-  const options = newVarOptions.value.split(',').map(o => o.trim()).filter(o => o)
-  if (options.length > 0) {
-    form.value.variationOptions[newVarName.value.trim()] = options
-  }
-  newVarName.value = ''
-  newVarOptions.value = ''
-}
-
-const removeVariation = (key: string) => {
-  const newOpts = { ...form.value.variationOptions }
-  delete newOpts[key]
-  form.value.variationOptions = newOpts
 }
 
 const handleSubmit = async () => {
@@ -347,7 +292,9 @@ const handleSubmit = async () => {
       category_id: form.value.categoryId || null,
       active: form.value.active,
       highlighted: form.value.highlighted,
-      variation_options: Object.keys(form.value.variationOptions).length > 0 ? form.value.variationOptions : null,
+      variation_options: form.value.variationOptions.length > 0 
+        ? form.value.variationOptions.filter(v => v.name && v.options.length > 0) 
+        : null,
       image_urls: uploadedUrls.length > 0 ? uploadedUrls : null
     }
 

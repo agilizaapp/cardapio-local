@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DbStoreStatusMessages } from '~/types/database'
-import { unwrap } from '~/utils/errors'
+import { unwrap, handleSupabaseError } from '../../app/utils/errors'
 
 export function createStoreStatusRepository(client: SupabaseClient) {
     return {
@@ -15,13 +15,11 @@ export function createStoreStatusRepository(client: SupabaseClient) {
         },
 
         async upsert(payload: DbStoreStatusMessages) {
-            const result = await client
+            const { error } = await client
                 .from('store_status_messages')
                 .upsert(payload)
-                .select()
-                .single()
             
-            return unwrap(result)
+            if (error) handleSupabaseError(error)
         }
     }
 }

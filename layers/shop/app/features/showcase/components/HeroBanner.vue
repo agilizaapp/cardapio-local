@@ -1,5 +1,8 @@
 <template>
-  <div v-if="promoProducts.length > 0" class="w-full flex justify-center mb-2">
+  <div
+    v-if="promoProducts.length > 0"
+    class="w-full flex justify-center mb-2 min-[383px]"
+  >
     <main
       class="relative w-full h-[350px] md:h-[400px] rounded-[2rem] overflow-hidden shadow-2xl bg-black group"
     >
@@ -39,7 +42,7 @@
             <div class="space-y-2 mb-4">
               <span
                 v-if="getDiscount(product)"
-                class="inline-block bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest animate-pulse"
+                class="inline-block bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest animate-pulse"
               >
                 Oferta Imperdível
               </span>
@@ -69,12 +72,12 @@
                   {{ (product.promoPrice || product.price).toFixed(2) }}</span
                 >
               </div>
-              <button
+              <Button
                 @click.stop="$emit('add-to-cart', product)"
-                class="bg-[var(--primary)] text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-xl active:scale-95"
+                class="px-8 h-12 rounded-full font-black text-xs uppercase tracking-widest shadow-xl"
               >
                 Comprar Agora
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -92,7 +95,7 @@
           :class="[
             'h-1.5 transition-all duration-500 ease-in-out cursor-pointer rounded-full',
             index === currentIndex
-              ? 'bg-red-500 w-12 opacity-100'
+              ? 'bg-primary w-12 opacity-100'
               : 'bg-white/30 w-6 opacity-60 hover:opacity-100',
           ]"
           :aria-label="`Ir para o slide ${index + 1}`"
@@ -105,6 +108,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import type { Product } from "~/types/app";
+import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{
   products: Product[];

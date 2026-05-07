@@ -16,8 +16,7 @@ export const storeStatusService = {
                 ready: 'Olá, {nome}!\n\nSeu pedido *#{id}* está reservado e aguardando a confirmação do pagamento.\n\nSe já pagou, pode ignorar essa mensagem — assim que identificarmos, te avisamos! Caso tenha alguma dúvida sobre o pagamento, é só falar. 🙏',
                 completed_delivery: 'Seu pedido saiu, {nome}! 🚀\n\nO pedido *#{id}* está a caminho e logo chegará até você.\n\nObrigado pela preferência! Se precisar de qualquer coisa, estamos por aqui. 😊',
                 completed_pickup: 'Tudo pronto, {nome}! 🎁\n\nSeu pedido *#{id}* já está disponível para retirada.\n\nPode vir buscar quando quiser! Qualquer dúvida é só chamar. 😊',
-                cancelled: 'Olá, {nome}.\n\nInfelizmente não conseguimos dar continuidade ao pedido *#{id}* no momento.\n\nSe quiser entender o motivo ou fazer um novo pedido, é só nos chamar — ficaremos felizes em te ajudar! 🤝',
-                updated_at: new Date().toISOString()
+                cancelled: 'Olá, {nome}.\n\nInfelizmente não conseguimos dar continuidade ao pedido *#{id}* no momento.\n\nSe quiser entender o motivo ou fazer um novo pedido, é só nos chamar — ficaremos felizes em te ajudar! 🤝'
             }
         }
         
@@ -26,6 +25,8 @@ export const storeStatusService = {
 
     async updateMessages(supabase: SupabaseClient, payload: DbStoreStatusMessages) {
         const repo = createStoreStatusRepository(supabase)
-        return await repo.upsert(payload)
+        // Remover updated_at para evitar loops se houver trigger no banco
+        const { updated_at, ...cleanPayload } = payload as any
+        return await repo.upsert(cleanPayload)
     }
 }

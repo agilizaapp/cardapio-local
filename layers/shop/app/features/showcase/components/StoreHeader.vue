@@ -1,6 +1,7 @@
 <template>
   <header
-    class="sticky top-0 z-40 flex items-center justify-between py-4 px-6 bg-white/80 backdrop-blur-md border-b border-black/5 transition-all duration-300"
+    class="sticky top-0 z-40 flex items-center justify-between py-4 px-6 backdrop-blur-md border-b border-white/10 shadow-sm transition-all duration-300"
+    style="background-color: rgba(var(--bg-primary-rgb), 0.8)"
   >
     <div class="flex items-center gap-4">
       <!-- Menu Icon -->
@@ -11,14 +12,17 @@
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button> -->
-      <h1 class="text-xl font-black tracking-widest text-gray-900 uppercase">
+      <h1 class="text-xl font-black tracking-widest uppercase" style="color: currentColor">
         {{ storeName }}
       </h1>
     </div>
 
-    <button
+    <Button
       @click="$emit('open-cart')"
-      class="relative text-gray-800 hover:text-primary transition-colors active:scale-95 p-1"
+      variant="ghost"
+      size="icon"
+      class="relative hover:text-primary p-1"
+      style="color: currentColor"
     >
       <!-- Shopping Bag Icon -->
       <svg
@@ -42,11 +46,13 @@
       >
         {{ cartItemsCount }}
       </span>
-    </button>
+    </Button>
   </header>
 </template>
 
 <script setup lang="ts">
+import Button from "~/components/ui/Button.vue";
+
 defineProps<{
   storeName: string;
   cartItemsCount: number;

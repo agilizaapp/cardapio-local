@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex gap-4 items-start py-4 border-b border-gray-100 last:border-0"
+    class="flex gap-4 items-start py-4 border-b border-white/10 last:border-0"
   >
     <!-- Image -->
-    <div class="w-20 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+    <div class="w-20 h-20 bg-black/5 rounded overflow-hidden flex-shrink-0">
       <img
         v-if="item.product.imageUrls?.length"
         :src="item.product.imageUrls[0]"
@@ -15,47 +15,56 @@
     <!-- Info -->
     <div class="flex-1 flex flex-col min-w-0">
       <div class="flex justify-between items-start gap-2">
-        <h4 class="text-sm font-bold text-[#1A1A1A] truncate">
+        <h4 class="text-sm font-bold truncate" style="color: currentColor">
           {{ item.product.name }}
         </h4>
-        <span class="text-sm font-bold text-[#1A1A1A] whitespace-nowrap">{{
+        <span class="text-sm font-bold whitespace-nowrap" style="color: currentColor">{{
           formattedPrice
         }}</span>
       </div>
 
       <!-- Specs (e.g. Color, Size) -->
-      <div v-if="hasSpecs" class="text-xs text-[#797676] mt-1 truncate">
+      <div v-if="hasSpecs" class="text-xs opacity-40 mt-1 truncate" style="color: currentColor">
         {{ specsText }}
       </div>
 
       <!-- Actions -->
       <div class="flex items-center justify-between mt-auto pt-3">
         <!-- Quantity Selector -->
-        <div class="flex items-center border border-gray-200 rounded">
-          <button
+        <div class="flex items-center border border-white/10 rounded">
+          <Button
             @click="
               $emit('update-quantity', item.quantity - 1, item.selectedSpecs)
             "
-            class="px-2 py-1 text-[#797676] hover:text-[#1A1A1A] transition-colors"
+            variant="ghost"
+            size="sm"
+            class="px-2 py-1 h-auto opacity-40 hover:opacity-100"
+            style="color: currentColor"
           >
             -
-          </button>
-          <span class="px-2 py-1 text-xs font-medium min-w-[2ch] text-center">{{
+          </Button>
+          <span class="px-2 py-1 text-xs font-medium min-w-[2ch] text-center" style="color: currentColor">{{
             item.quantity
           }}</span>
-          <button
+          <Button
             @click="
               $emit('update-quantity', item.quantity + 1, item.selectedSpecs)
             "
-            class="px-2 py-1 text-[#797676] hover:text-[#1A1A1A] transition-colors"
+            variant="ghost"
+            size="sm"
+            class="px-2 py-1 h-auto opacity-40 hover:opacity-100"
+            style="color: currentColor"
           >
             +
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           @click="$emit('remove', item.selectedSpecs)"
-          class="text-xs text-[#797676] hover:text-red-500 transition-colors flex items-center gap-1"
+          variant="ghost"
+          size="sm"
+          class="text-xs opacity-40 hover:text-red-500 hover:opacity-100 h-auto p-1 flex items-center gap-1"
+          style="color: currentColor"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +81,7 @@
             />
           </svg>
           Remover
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -82,14 +91,15 @@
 import { computed } from "vue";
 import type { CartItem } from "~/types/app";
 import { formatCurrency } from "~/utils/currency";
+import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{
   item: CartItem;
 }>();
 
 defineEmits<{
-  (e: "update-quantity", qty: number, specs: Record<string, string>): void;
-  (e: "remove", specs: Record<string, string>): void;
+  (e: "update-quantity", qty: number, specs: Record<string, string | string[]>): void;
+  (e: "remove", specs: Record<string, string | string[]>): void;
 }>();
 
 const formattedPrice = computed(() => {
@@ -103,7 +113,10 @@ const hasSpecs = computed(
 const specsText = computed(() => {
   if (!hasSpecs.value) return "";
   return Object.entries(props.item.selectedSpecs || {})
-    .map(([key, val]) => `${key}: ${val}`)
+    .map(([key, val]) => {
+      const displayVal = Array.isArray(val) ? val.join(", ") : val;
+      return `${key}: ${displayVal}`;
+    })
     .join(" • ");
 });
 </script>

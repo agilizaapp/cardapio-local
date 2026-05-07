@@ -11,15 +11,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DbCategory, DbStore } from '~/types/database'
 import type { Store } from '~/types/app'
-import { unwrap } from '~/utils/errors'
+import { unwrap, handleSupabaseError } from '../../app/utils/errors'
 
 // Converte o formato do banco para o formato da aplicação
 function toStore(db: DbStore, categories?: DbCategory[]): Store {
     return {
         id: db.id,
+        ownerId: db.owner_id,
         slug: db.slug,
         name: db.name,
-        description: db.description,
         logoUrl: db.logo_url,
         whatsapp: db.whatsapp,
         pixKey: db.pix_key,
@@ -29,6 +29,8 @@ function toStore(db: DbStore, categories?: DbCategory[]): Store {
         themeSettings: {
             primaryColor: db.theme_settings.primary_color ?? '#000000',
             secondaryColor: db.theme_settings.secondary_color ?? '#ffffff',
+            bgPrimaryColor: db.theme_settings.primary_bg_color ?? '#ffffff',
+            bgSecondaryColor: db.theme_settings.secondary_bg_color ?? '#f9fafb',
             font: db.theme_settings.font ?? 'inter',
         },
         categories: categories?.map(c => ({
@@ -75,6 +77,26 @@ export function createStoreRepository(client: SupabaseClient) {
             const rows = unwrap(result)
             return rows.map(row => toStore(row.store))
         },
+
+        async findById(id: string): Promise<Store> {
+            const result = await client
+                .from('stores')
+                .select('*')
+                .eq('id', id)
+                .is('deleted_at', null)
+                .single()
+
+            return toStore(unwrap(result))
+        },
+
+        async update(id: string, data: Partial<DbStore>): Promise<void> {
+            const { error } = await client
+                .from('stores')
+                .update(data)
+                .eq('id', id)
+
+            if (error) handleSupabaseError(error)
+        }
     }
 }
 

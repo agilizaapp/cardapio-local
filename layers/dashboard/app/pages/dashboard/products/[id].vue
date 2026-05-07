@@ -205,86 +205,8 @@
         </div>
 
         <!-- Variações -->
-        <div
-          class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4"
-        >
-          <div class="flex justify-between items-center border-b pb-2">
-            <h3 class="text-lg font-semibold text-gray-900">
-              Variações (Ex: Tamanhos, Cores)
-            </h3>
-            <button
-              @click.prevent="showVariationModal = true"
-              @keydown.enter.prevent="{}"
-              class="text-sm text-blue-600 font-bold hover:underline"
-            >
-              + Adicionar Opção
-            </button>
-          </div>
-
-          <div
-            v-if="Object.keys(form.variationOptions).length === 0"
-            class="py-4 text-center text-gray-400 italic"
-          >
-            Nenhuma variação adicionada ainda.
-          </div>
-
-          <div
-            v-for="(options, key) in form.variationOptions"
-            :key="key"
-            class="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3"
-          >
-            <div class="flex justify-between items-center">
-              <input
-                :value="key"
-                @change="
-                  (e) =>
-                    renameVariation(key, (e.target as HTMLInputElement).value)
-                "
-                class="font-bold text-gray-900 bg-transparent border-none focus:ring-0 p-0 w-1/2"
-              />
-              <button
-                @click.prevent="removeVariation(key)"
-                class="text-red-500 hover:text-red-700"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <div
-                v-for="(opt, idx) in options"
-                :key="idx"
-                class="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-full text-sm"
-              >
-                <span>{{ opt }}</span>
-                <button
-                  @click.prevent="removeOptionValue(key, idx)"
-                  class="text-gray-400 hover:text-red-500"
-                >
-                  ×
-                </button>
-              </div>
-              <input
-                placeholder="Novo valor..."
-                class="px-3 py-1 bg-white border border-gray-300 rounded-full text-sm focus:ring-blue-600 w-32"
-                @keyup.enter="
-                  (e) =>
-                    addOptionValue(key, (e.target as HTMLInputElement).value, e)
-                "
-              />
-            </div>
-          </div>
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+          <VariationManager v-model="form.variationOptions" />
         </div>
       </div>
 
@@ -427,38 +349,17 @@
         />
       </div>
     </UiBaseModal>
-
-    <!-- Modal Nova Variação -->
-    <UiBaseModal
-      :is-open="showVariationModal"
-      title="Nova Variação"
-      confirm-text="Adicionar"
-      @close="showVariationModal = false"
-      @confirm="handleConfirmVariation"
-    >
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1"
-          >Nome da Variação (Ex: Cor, Tamanho, Voltagem)</label
-        >
-        <input
-          v-model="newVariationName"
-          type="text"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600"
-          placeholder="Ex: Tamanho"
-          @keyup.enter="handleConfirmVariation"
-        />
-      </div>
-    </UiBaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAdminAuth } from "../../../composables/useAdminAuth";
 import { useSupabaseClient } from "#imports";
 import { useUiStore } from "../../../stores/useUi";
 import type { Product } from "~/types/app";
+import VariationManager from "../../../components/products/VariationManager.vue";
 
 definePageMeta({ layout: "dashboard" });
 useHead({ title: "Editar Produto - Dashboard" });
@@ -481,7 +382,7 @@ const form = ref({
   categoryId: null as string | null,
   active: true,
   highlighted: false,
-  variationOptions: {} as Record<string, string[]>,
+  variationOptions: [] as any[],
   imageUrls: [] as string[],
   stock: 0,
 });
@@ -504,6 +405,19 @@ onMounted(async () => {
   try {
     const res: any = await $fetch(`/api/admin/products/${productId}`);
     const p = res.data as Product;
+    
+    // Converter legacy variationOptions (object) para novo formato (array) se necessário
+    let finalVariations = p.variationOptions || [];
+    if (!Array.isArray(finalVariations) && typeof finalVariations === 'object') {
+      finalVariations = Object.entries(finalVariations).map(([name, options]) => ({
+        name,
+        options: Array.isArray(options) ? options : [],
+        required: true,
+        multi: false,
+        limit: null
+      }));
+    }
+
     form.value = {
       name: p.name,
       description: p.description || "",
@@ -512,7 +426,7 @@ onMounted(async () => {
       categoryId: p.categoryId,
       active: p.active,
       highlighted: p.highlighted || false,
-      variationOptions: p.variationOptions || {},
+      variationOptions: finalVariations,
       imageUrls: p.imageUrls || [],
       stock: p.stock || 0,
     };
@@ -567,48 +481,6 @@ const handleCreateCategory = async () => {
   }
 };
 
-// Variações On-the-fly
-const showVariationModal = ref(false);
-const newVariationName = ref("");
-
-const handleConfirmVariation = () => {
-  if (
-    newVariationName.value &&
-    !form.value.variationOptions[newVariationName.value]
-  ) {
-    form.value.variationOptions[newVariationName.value] = [];
-    showVariationModal.value = false;
-    newVariationName.value = "";
-  } else if (form.value.variationOptions[newVariationName.value]) {
-    ui.addToast("Esta variação já existe", "info");
-  }
-};
-
-const renameVariation = (oldKey: string, newKey: string) => {
-  if (!newKey || oldKey === newKey) return;
-  const options = form.value.variationOptions[oldKey] || [];
-  delete form.value.variationOptions[oldKey];
-  form.value.variationOptions[newKey] = options;
-};
-
-const removeVariation = (key: string) =>
-  delete form.value.variationOptions[key];
-
-const addOptionValue = (key: string, value: string, event: Event) => {
-  const currentOptions = form.value.variationOptions[key] || [];
-  if (value && !currentOptions.includes(value)) {
-    form.value.variationOptions[key] = [...currentOptions, value];
-    (event.target as HTMLInputElement).value = "";
-  }
-};
-
-const removeOptionValue = (key: string, index: number) => {
-  const currentOptions = form.value.variationOptions[key] || [];
-  form.value.variationOptions[key] = currentOptions.filter(
-    (_, i) => i !== index,
-  );
-};
-
 // Submissão
 const handleSubmit = async () => {
   if (isSaving.value) return;
@@ -647,7 +519,9 @@ const handleSubmit = async () => {
       category_id: form.value.categoryId || null,
       active: form.value.active,
       highlighted: form.value.highlighted,
-      variation_options: form.value.variationOptions,
+      variation_options: form.value.variationOptions.length > 0 
+        ? form.value.variationOptions.filter(v => v.name && v.options.length > 0)
+        : null,
       image_urls: uploadedUrls,
       stock: form.value.stock,
       specifications: [], // Por enquanto vazio para evitar o erro do NOT NULL

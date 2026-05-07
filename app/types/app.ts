@@ -6,6 +6,8 @@ import type { OrderStatus, Plan } from './database'
 export interface ThemeSettings {
     primaryColor: string
     secondaryColor: string
+    bgPrimaryColor: string
+    bgSecondaryColor: string
     font: string
 }
 
@@ -21,9 +23,10 @@ export interface Category {
 
 export interface Store {
     id: string
+    ownerId: string
     slug: string
     name: string
-    description: string | null
+    description?: string | null
     logoUrl: string | null
     pixKey: string | null
     deliveryFee: number
@@ -74,7 +77,7 @@ export function getEffectivePrice(product: Product): number {
 export interface CartItem {
     product: Product
     quantity: number
-    selectedSpecs: Record<string, string> // ex: { Tamanho: 'M', Cor: 'Azul' }
+    selectedSpecs: Record<string, string | string[]> // ex: { Tamanho: 'M', Adicionais: ['Bacon', 'Ovo'] }
 }
 
 export interface Cart {
@@ -95,7 +98,7 @@ export interface CreateOrderPayload {
         productId: string
         quantity: number
         priceAtTime: number
-        selectedSpecs: Record<string, string>
+        selectedSpecs: Record<string, string | string[]>
     }[]
     subtotal: number
     deliveryFee: number
@@ -108,7 +111,7 @@ export interface OrderItem {
     productName: string
     unitPrice: number
     quantity: number
-    specsSnapshot: Record<string, string>
+    specsSnapshot: Record<string, string | string[]>
 }
 
 export interface Order {

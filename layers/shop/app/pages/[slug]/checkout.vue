@@ -1,13 +1,22 @@
 <template>
-  <div class="min-h-screen bg-white font-sans text-[#1A1A1A] flex flex-col">
+  <div
+    class="min-h-screen transition-colors duration-500 flex flex-col"
+    style="
+      font-family: var(--font-primary, sans-serif);
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+    "
+  >
     <!-- Header Simples -->
     <header
-      class="flex items-center gap-4 py-6 px-4 bg-white border-b border-gray-100"
+      class="sticky top-0 z-40 flex items-center gap-4 py-6 px-4 backdrop-blur-md border-b border-white/10 transition-all duration-300"
+      style="background-color: rgba(var(--bg-primary-rgb), 0.8)"
     >
       <NuxtLink
         :to="`/${route.params.slug}`"
         @click="clearOrderId"
-        class="text-[#1A1A1A] hover:bg-gray-50 p-2 rounded-full transition-colors -ml-2"
+        class="hover:bg-black/5 p-2 rounded-full transition-colors -ml-2"
+        style="color: currentColor"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +46,8 @@
       <!-- CASO 1: Pedido em Andamento -->
       <div v-if="currentOrderId">
         <div
-          class="flex flex-col items-center justify-center py-10 text-center gap-6 bg-blue-50/50 rounded-3xl p-8 border border-blue-100"
+          class="flex flex-col items-center justify-center py-10 text-center gap-6 rounded-3xl p-8 border border-white/10 shadow-sm"
+          style="background-color: var(--bg-secondary)"
         >
           <div
             class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center animate-bounce"
@@ -68,10 +78,11 @@
           </div>
 
           <div
-            class="w-full bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-left space-y-4"
+            class="w-full p-6 rounded-2xl shadow-sm border border-white/10 text-left space-y-4"
+            style="background-color: var(--bg-primary)"
           >
             <div
-              class="flex justify-between items-center pb-4 border-b border-gray-50"
+              class="flex justify-between items-center pb-4 border-b border-white/5"
             >
               <span class="text-xs font-bold text-gray-400 uppercase"
                 >Status Atual</span
@@ -97,13 +108,14 @@
                 WhatsApp.
               </p>
             </div>
-            <button
+            <Button
               @click="handleManualRefresh"
               :disabled="isRefreshing"
-              class="w-full py-3 border-2 border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all disabled:opacity-50"
+              variant="outline"
+              class="w-full text-[10px] font-black uppercase tracking-widest border-gray-100 h-12"
             >
               {{ isRefreshing ? "Aguarde..." : "Atualizar Status" }}
-            </button>
+            </Button>
             <p
               v-if="refreshCooldown > 0"
               class="text-[10px] text-center text-gray-400 italic"
@@ -112,12 +124,14 @@
             </p>
           </div>
 
-          <button
+          <Button
             @click="handleNewOrder"
-            class="text-xs text-gray-400 underline hover:text-gray-900 transition-colors"
+            variant="ghost"
+            size="sm"
+            class="text-xs text-gray-400 underline hover:text-gray-900 transition-colors h-auto p-0"
           >
             Fazer outro pedido
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -127,7 +141,8 @@
         class="flex flex-col items-center justify-center py-20 text-center gap-4"
       >
         <div
-          class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300"
+          class="w-16 h-16 rounded-full flex items-center justify-center text-gray-300"
+          style="background-color: var(--bg-secondary)"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -149,25 +164,29 @@
         <p class="text-[#797676] text-sm">
           Parece que você ainda não adicionou nada ao seu carrinho.
         </p>
-        <button
-          @click="() => { clearOrderId(); $router.push(`/${route.params.slug}`); }"
-          class="mt-4 px-6 py-2.5 bg-[#1A1A1A] text-white font-bold text-xs tracking-wider uppercase rounded"
+        <Button
+          @click="
+            () => {
+              clearOrderId();
+              $router.push(`/${route.params.slug}`);
+            }
+          "
+          class="mt-4 px-6 text-xs tracking-wider uppercase"
         >
           Continuar Comprando
-        </button>
+        </Button>
       </div>
 
       <!-- CASO 3: Fluxo de Checkout Ativo -->
-      <div v-else>
+      <div v-else class="flex flex-col gap-4">
         <!-- Cart Items -->
         <section class="flex flex-col">
           <div class="flex justify-between items-end mb-4">
-            <span
-              class="text-xs font-bold text-[#797676] uppercase tracking-wider"
+            <span class="text-xs font-bold opacity-40 uppercase tracking-wider"
               >{{ totalItems }} itens</span
             >
           </div>
-          <div class="border-t border-gray-100">
+          <div class="border-t border-white/10">
             <CartItemRow
               v-for="item in items"
               :key="`${item.product.id}-${JSON.stringify(item.selectedSpecs)}`"
@@ -205,6 +224,7 @@ import { useRoute } from "vue-router";
 import CartItemRow from "../../features/showcase/components/CartItemRow.vue";
 import CheckoutForm from "../../features/checkout/components/CheckoutForm.vue";
 import OrderSummary from "../../features/checkout/components/OrderSummary.vue";
+import Button from "~/components/ui/Button.vue";
 
 import { useCheckout } from "../../features/checkout/composables/useCheckout";
 import { useOrderTracking } from "../../features/checkout/composables/useOrderTracking";
@@ -372,7 +392,53 @@ const handleFinalize = async () => {
   }
 };
 
+const getFontFamily = (fontName: string) => {
+  const map: Record<string, string> = {
+    playfair: "Playfair Display",
+    inter: "Inter",
+    outfit: "Outfit",
+    roboto: "Roboto",
+  };
+  return map[fontName?.toLowerCase()] || "Inter";
+};
+
+const hexToRgb = (hex: string) => {
+  if (!hex) return "255, 255, 255";
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `${r}, ${g}, ${b}`;
+};
+
+const themeVars = computed(() => {
+  const store = storeStores.getCurrentStore;
+  if (!store?.themeSettings) return "";
+  const fontFamily = store.themeSettings.font
+    ? getFontFamily(store.themeSettings.font)
+    : "Inter";
+
+  const primaryBg = store.themeSettings.bgPrimaryColor || "#FFFFFF";
+  const primaryBgRgb = hexToRgb(primaryBg);
+
+  return `:root {
+    --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
+    --secondary: ${store.themeSettings.secondaryColor || "#FFFFFF"};
+    --bg-primary: ${primaryBg};
+    --bg-primary-rgb: ${primaryBgRgb};
+    --bg-secondary: ${store.themeSettings.bgSecondaryColor || "#F9FAFB"};
+    --text-main: ${primaryBg === "#0F172A" ? "#FFFFFF" : "#1A1A1A"};
+    --font-primary: '${fontFamily}', sans-serif;
+  }`;
+});
+
 useHead({
   title: `Seu Carrinho - ${storeName.value}`,
+  style: [
+    { innerHTML: themeVars.value },
+    {
+      innerHTML:
+        ".hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }",
+    },
+  ],
 });
 </script>

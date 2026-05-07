@@ -25,7 +25,7 @@ export function createOrderRepository(client: SupabaseClient) {
         productName: db.product_name,
         unitPrice: Number(db.unit_price),
         quantity: db.quantity,
-        specsSnapshot: db.specs_snapshot as Record<string, string>
+        specsSnapshot: db.specs_snapshot as Record<string, string | string[]>
     })
 
     return {

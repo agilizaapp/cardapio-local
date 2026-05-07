@@ -39,6 +39,7 @@ export function handleSupabaseError(error: PostgrestError): never {
   '23505': 'Este registro já existe.',           // unique_violation
   '23503': 'Referência inválida entre registros.', // foreign_key_violation
   '42501': 'Você não tem permissão para esta ação.', // insufficient_privilege
+  '54001': 'Erro de recursão no banco (stack depth). Verifique seus triggers.',
   'PGRST116': 'Registro não encontrado.',
  }
 

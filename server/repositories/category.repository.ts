@@ -1,7 +1,7 @@
 // server/repositories/category.repository.ts
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DbCategory } from '~/types/database'
-import { unwrap } from '~/utils/errors'
+import { unwrap, handleSupabaseError } from '../../app/utils/errors'
 
 export function createCategoryRepository(client: SupabaseClient) {
     return {
@@ -38,13 +38,13 @@ export function createCategoryRepository(client: SupabaseClient) {
         },
 
         async delete(id: string, storeId: string): Promise<void> {
-            const result = await client
+            const { error } = await client
                 .from('categories')
                 .delete()
                 .eq('id', id)
                 .eq('store_id', storeId)
 
-            unwrap(result)
+            if (error) handleSupabaseError(error)
         }
     }
 }

@@ -2,7 +2,8 @@
   <div class="flex flex-col group relative">
     <!-- Image -->
     <div
-      class="relative aspect-[4/5] bg-gray-50 rounded-2xl overflow-hidden border border-black/5 shadow-sm transition-all duration-500 group-hover:shadow-md"
+      class="relative aspect-[4/5] rounded-2xl overflow-hidden border border-black/5 shadow-sm transition-all duration-500 group-hover:shadow-md"
+      style="background-color: var(--bg-secondary)"
     >
       <img
         v-if="product.imageUrls?.length"
@@ -29,7 +30,8 @@
     <div class="flex flex-col mt-4 px-1 gap-1">
       <div class="flex justify-between items-start gap-2">
         <h3
-          class="text-sm font-bold text-gray-900 uppercase tracking-widest leading-tight"
+          class="text-sm font-bold uppercase tracking-widest leading-tight"
+          style="color: currentColor"
         >
           {{ product.name }}
         </h3>
