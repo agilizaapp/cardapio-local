@@ -142,6 +142,36 @@ export function createOrderRepository(client: SupabaseClient) {
                 .single()
 
             return mapToOrder(unwrap(result))
+        },
+
+        async getStats(storeId: string) {
+            // 1. Total de vendas (pedidos entregues) - Valor total
+            const { data: salesData } = await client
+                .from('orders')
+                .select('total')
+                .eq('store_id', storeId)
+                .eq('status', 'delivered')
+
+            const totalSales = salesData?.reduce((acc, curr) => acc + Number(curr.total), 0) || 0
+
+            // 2. Quantidade total de pedidos
+            const { count: totalOrders } = await client
+                .from('orders')
+                .select('*', { count: 'exact', head: true })
+                .eq('store_id', storeId)
+
+            // 3. Pedidos pendentes
+            const { count: pendingOrders } = await client
+                .from('orders')
+                .select('*', { count: 'exact', head: true })
+                .eq('store_id', storeId)
+                .eq('status', 'pending')
+
+            return {
+                totalSales,
+                totalOrders: totalOrders || 0,
+                pendingOrders: pendingOrders || 0
+            }
         }
     }
 }

@@ -10,7 +10,10 @@
     <!-- Header Simples -->
     <header
       class="sticky top-0 z-40 flex items-center gap-4 py-6 px-4 backdrop-blur-md border-b border-white/10 transition-all duration-300"
-      style="background-color: rgba(var(--bg-primary-rgb), 0.8); color: var(--text-main)"
+      style="
+        background-color: rgba(var(--bg-primary-rgb), 0.8);
+        color: var(--text-main);
+      "
     >
       <NuxtLink
         :to="`/${route.params.slug}`"
@@ -72,8 +75,9 @@
               Pedido em Andamento
             </h2>
             <p class="text-gray-500 text-sm mt-2">
-              Seu pedido foi enviado para o WhatsApp da loja e estamos
-              aguardando a confirmação do lojista.
+              Seu pedido foi enviado para a loja e estamos aguardando a
+              confirmação do lojista. Pode demorar até 5 minutos para atualizar
+              o status do pedido.
             </p>
           </div>
 
@@ -108,14 +112,39 @@
                 WhatsApp.
               </p>
             </div>
-            <Button
-              @click="handleManualRefresh"
-              :disabled="isRefreshing"
-              variant="outline"
-              class="w-full text-[10px] font-black uppercase tracking-widest border-gray-100 h-12"
-            >
-              {{ isRefreshing ? "Aguarde..." : "Atualizar Status" }}
-            </Button>
+            <div class="flex flex-col gap-2 pt-2">
+              <Button
+                @click="handleManualRefresh"
+                :disabled="isRefreshing"
+                variant="outline"
+                class="w-full text-[10px] font-black uppercase tracking-widest border-gray-100 h-12"
+              >
+                {{ isRefreshing ? "Aguarde..." : "Atualizar Status" }}
+              </Button>
+              <Button
+                @click="handleTalkToStore"
+                variant="default"
+                class="w-full text-[10px] font-black uppercase tracking-widest h-12 bg-[#25D366] hover:bg-[#128C7E] text-white border-none shadow-lg shadow-green-500/20"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="mr-2"
+                >
+                  <path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.7 8.38 8.38 0 0 1 3.8.9L21 3z"
+                  ></path>
+                </svg>
+                Falar com a Loja
+              </Button>
+            </div>
             <p
               v-if="refreshCooldown > 0"
               class="text-[10px] text-center text-gray-400 italic"
@@ -246,7 +275,8 @@ const { currentOrderId, saveOrderId, loadOrderId, clearOrderId } =
 
 const storeStores = useStoreStores();
 
-const orderStatus = ref("pending");
+const orderData = ref<any>(null);
+const orderStatus = computed(() => orderData.value?.status || "pending");
 const isRefreshing = ref(false);
 const refreshCooldown = ref(0);
 
@@ -260,10 +290,8 @@ onMounted(() => {
 const fetchStatus = async () => {
   if (!currentOrderId.value) return;
   try {
-    const data = await $fetch<{ status: string }>(
-      `/api/shop/orders/${currentOrderId.value}`,
-    );
-    orderStatus.value = data.status;
+    const data = await $fetch<any>(`/api/shop/orders/${currentOrderId.value}`);
+    orderData.value = data;
   } catch (e) {
     console.error("Erro ao atualizar status");
   }
@@ -288,6 +316,15 @@ const handleManualRefresh = async () => {
     refreshCooldown.value--;
     if (refreshCooldown.value <= 0) clearInterval(timer);
   }, 1000);
+};
+
+const handleTalkToStore = () => {
+  if (!currentOrderId.value) return;
+  const whatsappUrl = generateWhatsappUrl(
+    currentOrderId.value,
+    orderData.value?.customerName || "Cliente",
+  );
+  window.open(whatsappUrl, "_blank");
 };
 
 const handleNewOrder = () => {
@@ -379,14 +416,10 @@ const handleFinalize = async () => {
     // 2. Salvar ID na sessão e atualizar estado local
     saveOrderId(order.id);
     currentOrderId.value = order.id;
-    orderStatus.value = "pending";
 
-    // 3. Limpar carrinho
+    // 3. Limpar carrinho e carregar dados do pedido
     clearCart();
-
-    // 4. Abrir WhatsApp com mensagem simplificada
-    const whatsappUrl = generateWhatsappUrl(order.id, customerName);
-    window.open(whatsappUrl, "_blank");
+    await fetchStatus();
   } catch (e: any) {
     alert(e.statusMessage || "Erro ao processar pedido. Tente novamente.");
   }
@@ -429,8 +462,12 @@ const themeVars = computed(() => {
 
   const textMain = isDark ? "#FFFFFF" : "#1A1A1A";
   const textMuted = isDark ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-  const bgSurface = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)";
-  const borderSubtle = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
+  const bgSurface = isDark
+    ? "rgba(255, 255, 255, 0.05)"
+    : "rgba(0, 0, 0, 0.02)";
+  const borderSubtle = isDark
+    ? "rgba(255, 255, 255, 0.1)"
+    : "rgba(0, 0, 0, 0.08)";
 
   return `:root {
     --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
