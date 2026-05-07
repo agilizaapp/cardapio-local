@@ -87,6 +87,17 @@
         />
       </div>
 
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-[#797676]">WhatsApp</label>
+        <input
+          type="text"
+          :value="modelValue.whatsapp"
+          @input="handleWhatsappInput"
+          class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] focus:border-[#1A1A1A] text-sm"
+          placeholder="(00) 00000-0000"
+        />
+      </div>
+
       <div class="flex flex-col gap-1.5" v-if="modelValue.deliveryMethod === 'home'">
         <label class="text-xs font-bold text-[#797676]">Endereço de Entrega</label>
         <input
@@ -103,24 +114,40 @@
 
 <script setup lang="ts">
 export interface CheckoutFormState {
-  firstName: string
-  lastName: string
-  address: string
-  deliveryMethod: 'home' | 'pickup'
+  firstName: string;
+  lastName: string;
+  whatsapp: string;
+  address: string;
+  deliveryMethod: "home" | "pickup";
 }
 
 const props = defineProps<{
-  modelValue: CheckoutFormState
-}>()
+  modelValue: CheckoutFormState;
+}>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: CheckoutFormState): void
-}>()
+  (e: "update:modelValue", value: CheckoutFormState): void;
+}>();
 
 const updateField = (field: keyof CheckoutFormState, value: string) => {
-  emit('update:modelValue', {
+  emit("update:modelValue", {
     ...props.modelValue,
-    [field]: value
-  })
-}
+    [field]: value,
+  });
+};
+
+const formatWhatsapp = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7)
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+};
+
+const handleWhatsappInput = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const formatted = formatWhatsapp(input.value);
+  input.value = formatted;
+  updateField("whatsapp", formatted);
+};
 </script>

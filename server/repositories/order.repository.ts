@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DbOrder, DbOrderItem, OrderStatus } from '~/types/database'
-import type { Order, CreateOrderPayload } from '~/types/app'
+import type { Order, CreateOrderPayload, OrderItem } from '~/types/app'
 import { unwrap } from '~/utils/errors'
 
 export function createOrderRepository(client: SupabaseClient) {
@@ -8,6 +8,7 @@ export function createOrderRepository(client: SupabaseClient) {
         id: db.id,
         storeId: db.store_id,
         customerName: db.customer_name || "",
+        customerWhatsapp: db.customer_whatsapp || "",
         deliveryMethod: db.delivery_method || "",
         address: db.address || "",
         subtotal: Number(db.subtotal),
@@ -46,7 +47,7 @@ export function createOrderRepository(client: SupabaseClient) {
                 .insert({
                     store_id: payload.storeId,
                     customer_name: payload.customerName,
-                    customer_whatsapp: '', 
+                    customer_whatsapp: payload.customerWhatsapp,
                     delivery_method: payload.deliveryMethod,
                     address: payload.address,
                     subtotal: payload.subtotal,
@@ -102,7 +103,7 @@ export function createOrderRepository(client: SupabaseClient) {
                 .select('*, order_items(*)')
                 .eq('store_id', storeId)
                 .order('created_at', { ascending: false })
-            
+
             const data = unwrap(result)
             return data.map(mapToOrder)
         },
@@ -112,7 +113,7 @@ export function createOrderRepository(client: SupabaseClient) {
             const currentResult = await client.from('orders').select('status').eq('id', orderId).single()
             const currentStatus = unwrap(currentResult).status
 
-            if (status === 'completed' && currentStatus !== 'completed') {
+            if (status === 'delivered' && currentStatus !== 'delivered') {
                 const itemsResult = await client
                     .from('order_items')
                     .select('product_id, quantity')

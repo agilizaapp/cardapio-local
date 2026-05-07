@@ -8,7 +8,7 @@
 
 export type Plan = 'free' | 'pro' | 'enterprise'
 export type StoreRole = 'owner' | 'editor'
-export type OrderStatus = 'pending' | 'confirmed' | 'awaiting_payment' | 'completed' | 'cancelled'
+export type OrderStatus = 'pending' | 'confirmed' | 'ready' | 'delivered' | 'cancelled'
 
 export interface DbStore {
     id: string
@@ -82,6 +82,17 @@ export interface DbOrder {
 }
 
 export type SpecsValue = string | string[];
+
+export interface DbStoreStatusMessages {
+    store_id: string
+    pending: string
+    confirmed: string
+    ready: string
+    completed_delivery: string
+    completed_pickup: string
+    cancelled: string
+    updated_at: string
+}
 
 export interface DbOrderItem {
     id: string

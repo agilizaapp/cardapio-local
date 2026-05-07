@@ -4,8 +4,9 @@
     <header
       class="flex items-center gap-4 py-6 px-4 bg-white border-b border-gray-100"
     >
-      <button
-        @click="$router.push(`/${route.params.slug}`)"
+      <NuxtLink
+        :to="`/${route.params.slug}`"
+        @click="clearOrderId"
         class="text-[#1A1A1A] hover:bg-gray-50 p-2 rounded-full transition-colors -ml-2"
       >
         <svg
@@ -22,7 +23,7 @@
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
-      </button>
+      </NuxtLink>
       <h1
         class="text-lg font-bold tracking-[0.2em] uppercase flex-1 text-center pr-8"
       >
@@ -149,7 +150,7 @@
           Parece que você ainda não adicionou nada ao seu carrinho.
         </p>
         <button
-          @click="$router.push(`/${route.params.slug}`)"
+          @click="() => { clearOrderId(); $router.push(`/${route.params.slug}`); }"
           class="mt-4 px-6 py-2.5 bg-[#1A1A1A] text-white font-bold text-xs tracking-wider uppercase rounded"
         >
           Continuar Comprando
@@ -278,8 +279,9 @@ const statusLabel = computed(() => {
   const labels: Record<string, string> = {
     pending: "Aguardando Lojista",
     confirmed: "Pedido Aceito",
-    awaiting_payment: "Aguardando Pagamento",
-    completed: "Finalizado",
+    ready: "Aguardando Pagamento",
+    delivered: "Finalizado",
+    cancelled: "Cancelado",
   };
   return labels[orderStatus.value] || "Pendente";
 });
@@ -288,8 +290,9 @@ const statusClasses = computed(() => {
   const classes: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-700",
     confirmed: "bg-blue-100 text-blue-700",
-    awaiting_payment: "bg-purple-100 text-purple-700",
-    completed: "bg-green-100 text-green-700",
+    ready: "bg-purple-100 text-purple-700",
+    delivered: "bg-green-100 text-green-700",
+    cancelled: "bg-red-100 text-red-700",
   };
   return classes[orderStatus.value] || "bg-gray-100 text-gray-700";
 });
@@ -298,6 +301,7 @@ const storeName = computed(() => storeStores.getCurrentStore?.name ?? "");
 const formState = ref({
   firstName: "",
   lastName: "",
+  whatsapp: "",
   address: "",
   deliveryMethod: "home" as "home" | "pickup",
 });
@@ -311,9 +315,11 @@ const shippingFee = computed(() =>
 const estimatedTax = computed(() => subtotal.value * 0.08);
 
 const handleFinalize = async () => {
+  const { sanitizePhone, generateWhatsappUrl } = useCheckout();
+
   // Validação básica de UI
-  if (!formState.value.firstName || !formState.value.lastName) {
-    alert("Por favor, preencha seu nome.");
+  if (!formState.value.firstName || !formState.value.whatsapp) {
+    alert("Por favor, preencha nome e WhatsApp.");
     return;
   }
   if (formState.value.deliveryMethod === "home" && !formState.value.address) {
@@ -321,17 +327,23 @@ const handleFinalize = async () => {
     return;
   }
 
-  const url = generateWhatsappUrl(formState.value);
+  const customerName =
+    `${formState.value.firstName} ${formState.value.lastName}`.trim();
+  const sanitizedWhatsapp = sanitizePhone(formState.value.whatsapp);
 
   try {
     // 1. Criar pedido na API
-    const order = await $fetch("/api/shop/orders/create", {
+    const order = await $fetch<{ id: string }>("/api/shop/orders/create", {
       method: "POST",
       body: {
         storeId: storeStores.getCurrentStore?.id,
-        customerName: `${formState.value.firstName} ${formState.value.lastName}`,
+        customerName,
+        customerWhatsapp: sanitizedWhatsapp,
         deliveryMethod: formState.value.deliveryMethod,
-        address: formState.value.address,
+        address:
+          formState.value.deliveryMethod === "home"
+            ? formState.value.address
+            : null,
         items: items.value.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -344,16 +356,19 @@ const handleFinalize = async () => {
       },
     });
 
-    // 2. Salvar ID na sessão
+    // 2. Salvar ID na sessão e atualizar estado local
     saveOrderId(order.id);
+    currentOrderId.value = order.id;
+    orderStatus.value = "pending";
 
     // 3. Limpar carrinho
     clearCart();
 
-    // 4. Abrir WhatsApp
-    window.open(url, "_blank");
+    // 4. Abrir WhatsApp com mensagem simplificada
+    const whatsappUrl = generateWhatsappUrl(order.id, customerName);
+    window.open(whatsappUrl, "_blank");
   } catch (e: any) {
-    alert("Erro ao processar pedido. Tente novamente.");
+    alert(e.statusMessage || "Erro ao processar pedido. Tente novamente.");
   }
 };
 

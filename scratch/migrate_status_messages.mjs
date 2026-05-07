@@ -11,8 +11,8 @@ async function migrate() {
       store_id        uuid PRIMARY KEY REFERENCES stores(id) ON DELETE CASCADE,
       pending         text NOT NULL DEFAULT 'Olá {nome}! Recebemos seu pedido #{id} e estamos verificando a disponibilidade. Em breve retornamos!',
       confirmed       text NOT NULL DEFAULT 'Olá {nome}! Pedido #{id} aceito! Para prosseguir: {infos_pagamento}',
-      awaiting_payment text NOT NULL DEFAULT 'Olá {nome}! Aguardando confirmação do pagamento do pedido #{id}.',
-      completed       text NOT NULL DEFAULT 'Olá {nome}! Seu pedido #{id} está pronto!',
+      ready           text NOT NULL DEFAULT 'Olá {nome}! Aguardando confirmação do pagamento do pedido #{id}.',
+      delivered       text NOT NULL DEFAULT 'Olá {nome}! Seu pedido #{id} está pronto!',
       cancelled       text NOT NULL DEFAULT 'Olá {nome}! O pedido #{id} foi cancelado. Entre em contato para mais informações.',
       updated_at      timestamptz DEFAULT now()
     );

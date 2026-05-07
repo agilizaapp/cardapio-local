@@ -4,72 +4,32 @@ import type { CartItem } from '~/types/app'
 import { formatCurrency } from '~/utils/currency'
 
 interface CheckoutData {
-  firstName: string
-  lastName: string
-  address: string
-  deliveryMethod: 'home' | 'pickup'
-}
-
-const SPEC_ICONS: Record<string, string> = {
-  cor: '🎨',
-  tamanho: '📐',
-  material: '🧵',
-  modelo: '✂️',
-  variacao: '✨',
-  tipo: '🏷️'
+  firstName: string;
+  lastName: string;
+  whatsapp: string;
+  address: string;
+  deliveryMethod: "home" | "pickup";
 }
 
 export const useCheckout = () => {
-  const { items, subtotal } = useCart()
+  const sanitizePhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, "");
+    return digits.startsWith("55") ? digits : `55${digits}`;
+  };
 
-  const getSpecIcon = (key: string) => {
-    const normalized = key.toLowerCase().trim()
-    return SPEC_ICONS[normalized] ?? '▸'
-  }
+  const generateWhatsappUrl = (orderId: string, customerName: string) => {
+    const storeData = useStoreStores().getCurrentStore;
+    const storePhone = storeData?.whatsapp ?? "";
+    const shortId = orderId.slice(0, 8).toUpperCase();
 
-  const generateWhatsappUrl = (data: CheckoutData) => {
-    const storeData = useStoreStores().getCurrentStore
-    const phone = storeData?.whatsapp ?? ''
-    const deliveryFee = data.deliveryMethod === 'home' ? (storeData?.deliveryFee ?? 0) : 0
-    const total = subtotal.value + deliveryFee
-
-    const deliveryLabel = data.deliveryMethod === 'home' ? 'Entrega em casa' : 'Retirada no local'
-
-    let message = `*Novo Pedido — ${storeData?.name}*\n`
-    message += `━━━━━━━━━━━━━━━━━━━━\n\n`
-
-    message += `*Cliente:* ${data.firstName} ${data.lastName}\n`
-    message += `*Entrega:* ${deliveryLabel}\n`
-
-    if (data.deliveryMethod === 'home') {
-      message += `*Endereço:* ${data.address}\n`
-    }
-
-    message += `\n*Itens do Pedido*\n`
-    message += `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n`
-
-    items.value.forEach((item: CartItem) => {
-      const price = item.product.promoPrice ?? item.product.price
-      message += `\n▸ *${item.quantity}× ${item.product.name}* — ${formatCurrency(price)}\n`
-
-      Object.entries(item.selectedSpecs || {}).forEach(([key, val]) => {
-        message += `  _${key}: ${val}_\n`   // itálico nativo do WhatsApp, sem emoji
-      })
-    })
-
-    message += `\n━━━━━━━━━━━━━━━━━━━━\n`
-    message += `*Subtotal:* ${formatCurrency(subtotal.value)}\n`
-    if (deliveryFee > 0) {
-      message += `*Frete:* ${formatCurrency(deliveryFee)}\n`
-    }
-    message += `\n*Total: ${formatCurrency(total)}*\n`
-
-    const encodedMessage = encodeURIComponent(message)
-    return `https://wa.me/${phone}?text=${encodedMessage}`
-  }
+    const message = `Olá! Gostaria de saber sobre o meu pedido.\nNome: ${customerName}\nPedido: #${shortId}`;
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/${storePhone}?text=${encodedMessage}`;
+  };
 
   return {
+    sanitizePhone,
     generateWhatsappUrl,
-    formatCurrency
-  }
-}
+    formatCurrency,
+  };
+};

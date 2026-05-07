@@ -88,6 +88,7 @@ export interface Cart {
 export interface CreateOrderPayload {
     storeId: string
     customerName: string
+    customerWhatsapp: string
     deliveryMethod: string
     address: string | null
     items: {
@@ -114,6 +115,7 @@ export interface Order {
     id: string
     storeId: string
     customerName: string
+    customerWhatsapp: string
     deliveryMethod: string
     address: string | null
     subtotal: number
