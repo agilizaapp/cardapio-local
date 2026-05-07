@@ -44,7 +44,8 @@ export default defineEventHandler(async (event) => {
             highlighted: body.highlighted,
             image_urls: body.image_urls || [],
             specifications: body.specifications || [],
-            variation_options: body.variation_options || {}
+            variation_options: body.variation_options || {},
+            stock: body.stock
         })
 
         return { success: true, data: product }

@@ -23,6 +23,7 @@
       <nav class="flex-1 p-4 space-y-2">
         <NuxtLink to="/dashboard" :class="['block px-4 py-2 rounded-lg font-medium transition-colors', $route.path === '/dashboard' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900']">Início</NuxtLink>
         <NuxtLink to="/dashboard/products" :class="['block px-4 py-2 rounded-lg font-medium transition-colors', $route.path.startsWith('/dashboard/products') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900']">Produtos</NuxtLink>
+        <NuxtLink to="/dashboard/orders" :class="['block px-4 py-2 rounded-lg font-medium transition-colors', $route.path.startsWith('/dashboard/orders') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900']">Pedidos</NuxtLink>
         <NuxtLink to="/dashboard/settings" :class="['block px-4 py-2 rounded-lg font-medium transition-colors', $route.path.startsWith('/dashboard/settings') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900']">Loja & Ajustes</NuxtLink>
       </nav>
       <div class="p-4 border-t border-gray-200">

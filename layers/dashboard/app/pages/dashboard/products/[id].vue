@@ -365,15 +365,43 @@
               <option :value="false">Oculto</option>
             </select>
           </div>
+          <div class="space-y-2 mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Estoque Disponível</label
+            >
+            <input
+              v-model.number="form.stock"
+              type="number"
+              min="0"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 bg-white"
+              placeholder="Ex: 10"
+            />
+            <p class="text-xs text-gray-500">
+              O produto será ocultado automaticamente se o estoque chegar a zero
+              na vitrine.
+            </p>
+          </div>
+
           <div class="pt-2">
             <label class="flex items-center gap-3 cursor-pointer group">
               <div class="relative">
-                <input type="checkbox" v-model="form.highlighted" class="sr-only peer" />
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <input
+                  type="checkbox"
+                  v-model="form.highlighted"
+                  class="sr-only peer"
+                />
+                <div
+                  class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                ></div>
               </div>
-              <span class="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition">Marcar como Destaque (Hero)</span>
+              <span
+                class="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition"
+                >Marcar como Destaque (Hero)</span
+              >
             </label>
-            <p class="text-xs text-gray-500 mt-1">Produtos em destaque aparecerão no carrossel principal da loja.</p>
+            <p class="text-xs text-gray-500 mt-1">
+              Produtos em destaque aparecerão no carrossel principal da loja.
+            </p>
           </div>
         </div>
       </div>
@@ -430,6 +458,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAdminAuth } from "../../../composables/useAdminAuth";
 import { useSupabaseClient } from "#imports";
 import { useUiStore } from "../../../stores/useUi";
+import type { Product } from "~/types/app";
 
 definePageMeta({ layout: "dashboard" });
 useHead({ title: "Editar Produto - Dashboard" });
@@ -454,6 +483,7 @@ const form = ref({
   highlighted: false,
   variationOptions: {} as Record<string, string[]>,
   imageUrls: [] as string[],
+  stock: 0,
 });
 
 // Buscar Categorias
@@ -473,7 +503,7 @@ onMounted(async () => {
   await fetchCategories();
   try {
     const res: any = await $fetch(`/api/admin/products/${productId}`);
-    const p = res.data;
+    const p = res.data as Product;
     form.value = {
       name: p.name,
       description: p.description || "",
@@ -484,6 +514,7 @@ onMounted(async () => {
       highlighted: p.highlighted || false,
       variationOptions: p.variationOptions || {},
       imageUrls: p.imageUrls || [],
+      stock: p.stock || 0,
     };
   } catch (e: any) {
     ui.addToast("Erro ao carregar produto: " + e.message, "error");
@@ -506,9 +537,8 @@ const handleImageSelect = (e: Event) => {
     return;
   }
 
-  for (let i = 0; i < files.length; i++) {
-    selectedImages.value.push(files[i]);
-  }
+  const newFiles = Array.from(files);
+  selectedImages.value.push(...newFiles);
 };
 
 const getImagePreview = (file: File) => URL.createObjectURL(file);
@@ -556,7 +586,7 @@ const handleConfirmVariation = () => {
 
 const renameVariation = (oldKey: string, newKey: string) => {
   if (!newKey || oldKey === newKey) return;
-  const options = form.value.variationOptions[oldKey];
+  const options = form.value.variationOptions[oldKey] || [];
   delete form.value.variationOptions[oldKey];
   form.value.variationOptions[newKey] = options;
 };
@@ -565,14 +595,18 @@ const removeVariation = (key: string) =>
   delete form.value.variationOptions[key];
 
 const addOptionValue = (key: string, value: string, event: Event) => {
-  if (value && !form.value.variationOptions[key].includes(value)) {
-    form.value.variationOptions[key].push(value);
+  const currentOptions = form.value.variationOptions[key] || [];
+  if (value && !currentOptions.includes(value)) {
+    form.value.variationOptions[key] = [...currentOptions, value];
     (event.target as HTMLInputElement).value = "";
   }
 };
 
 const removeOptionValue = (key: string, index: number) => {
-  form.value.variationOptions[key].splice(index, 1);
+  const currentOptions = form.value.variationOptions[key] || [];
+  form.value.variationOptions[key] = currentOptions.filter(
+    (_, i) => i !== index,
+  );
 };
 
 // Submissão
@@ -615,6 +649,7 @@ const handleSubmit = async () => {
       highlighted: form.value.highlighted,
       variation_options: form.value.variationOptions,
       image_urls: uploadedUrls,
+      stock: form.value.stock,
       specifications: [], // Por enquanto vazio para evitar o erro do NOT NULL
     };
 

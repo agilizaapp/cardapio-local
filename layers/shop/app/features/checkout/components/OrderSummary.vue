@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { formatCurrency } from "../../../utils/currency";
+import { formatCurrency } from "~/utils/currency";
 
 const props = defineProps<{
   subtotal: number;

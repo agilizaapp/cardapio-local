@@ -23,6 +23,7 @@ function toProduct(db: DbProductWithCategory): Product {
         promoPrice: db.promo_price,
         imageUrls: db.image_urls,
         highlighted: db.highlighted,
+        stock: db.stock,
         specifications: db.specifications,
         active: db.active,
         variationOptions: db.variation_options,

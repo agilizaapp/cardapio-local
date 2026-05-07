@@ -59,6 +59,7 @@ export interface Product {
     imageUrls: string[]
     specifications: ProductSpec[]
     variationOptions: ProductVariationOption
+    stock: number
     active: boolean
 }
 
@@ -87,26 +88,38 @@ export interface Cart {
 export interface CreateOrderPayload {
     storeId: string
     customerName: string
-    customerWhatsapp: string
+    deliveryMethod: string
+    address: string | null
     items: {
         productId: string
-        productName: string
-        unitPrice: number
         quantity: number
-        specsSnapshot: Record<string, string>
+        priceAtTime: number
+        selectedSpecs: Record<string, string>
     }[]
-    total: number
+    subtotal: number
     deliveryFee: number
-    notes?: string
+    total: number
+}
+
+export interface OrderItem {
+    id: string
+    productId: string | null
+    productName: string
+    unitPrice: number
+    quantity: number
+    specsSnapshot: Record<string, string>
 }
 
 export interface Order {
     id: string
-    customerName: string | null
-    customerWhatsapp: string
-    status: OrderStatus
-    total: number
+    storeId: string
+    customerName: string
+    deliveryMethod: string
+    address: string | null
+    subtotal: number
     deliveryFee: number
-    notes: string | null
-    createdAt: Date
+    total: number
+    status: OrderStatus
+    items?: OrderItem[]
+    createdAt: string
 }

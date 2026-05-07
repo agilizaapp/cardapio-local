@@ -79,6 +79,7 @@
               class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider"
             >
               <th class="p-4">Produto</th>
+              <th class="p-4">Estoque</th>
               <th class="p-4">Categoria</th>
               <th class="p-4">Preço</th>
               <th class="p-4">Status</th>
@@ -120,6 +121,9 @@
                   </div>
                 </div>
                 <div class="font-medium text-gray-900">{{ product.name }}</div>
+              </td>
+              <td class="p-4 text-gray-600 font-medium text-center">
+                {{ product.stock }}
               </td>
               <td class="p-4 text-gray-600">
                 {{ product.categoryName || "Sem Categoria" }}

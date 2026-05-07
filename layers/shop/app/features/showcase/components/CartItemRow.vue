@@ -33,7 +33,9 @@
         <!-- Quantity Selector -->
         <div class="flex items-center border border-gray-200 rounded">
           <button
-            @click="$emit('update-quantity', item.quantity - 1, item.selectedSpecs)"
+            @click="
+              $emit('update-quantity', item.quantity - 1, item.selectedSpecs)
+            "
             class="px-2 py-1 text-[#797676] hover:text-[#1A1A1A] transition-colors"
           >
             -
@@ -42,7 +44,9 @@
             item.quantity
           }}</span>
           <button
-            @click="$emit('update-quantity', item.quantity + 1, item.selectedSpecs)"
+            @click="
+              $emit('update-quantity', item.quantity + 1, item.selectedSpecs)
+            "
             class="px-2 py-1 text-[#797676] hover:text-[#1A1A1A] transition-colors"
           >
             +
@@ -77,7 +81,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { CartItem } from "~/types/app";
-import { formatCurrency } from "../../../utils/currency";
+import { formatCurrency } from "~/utils/currency";
 
 const props = defineProps<{
   item: CartItem;

@@ -1,7 +1,9 @@
 <template>
   <div class="flex flex-col group relative">
     <!-- Image -->
-    <div class="relative aspect-[4/5] bg-gray-50 rounded-2xl overflow-hidden border border-black/5 shadow-sm transition-all duration-500 group-hover:shadow-md">
+    <div
+      class="relative aspect-[4/5] bg-gray-50 rounded-2xl overflow-hidden border border-black/5 shadow-sm transition-all duration-500 group-hover:shadow-md"
+    >
       <img
         v-if="product.imageUrls?.length"
         :src="product.imageUrls[0]"
@@ -9,7 +11,10 @@
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
       <!-- Badge de Desconto -->
-      <div v-if="discountPercentage" class="absolute top-3 right-3 z-10 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+      <div
+        v-if="discountPercentage"
+        class="absolute top-3 right-3 z-10 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg"
+      >
         -{{ discountPercentage }}%
       </div>
       <div
@@ -23,11 +28,16 @@
     <!-- Info -->
     <div class="flex flex-col mt-4 px-1 gap-1">
       <div class="flex justify-between items-start gap-2">
-        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest leading-tight">
+        <h3
+          class="text-sm font-bold text-gray-900 uppercase tracking-widest leading-tight"
+        >
           {{ product.name }}
         </h3>
         <div class="flex flex-col items-end shrink-0">
-          <span v-if="product.promoPrice" class="text-[10px] text-gray-400 line-through font-bold">
+          <span
+            v-if="product.promoPrice"
+            class="text-[10px] text-gray-400 line-through font-bold"
+          >
             {{ formatCurrency(product.price) }}
           </span>
           <span class="text-sm font-bold text-primary">
@@ -59,7 +69,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Product } from "~/types/app";
-import { formatCurrency } from "../../../utils/currency";
+import { formatCurrency } from "~~/app/utils/currency";
 import Button from "~/components/ui/Button.vue";
 
 const props = defineProps<{
@@ -78,7 +88,9 @@ const formattedPrice = computed(() => {
 
 const discountPercentage = computed(() => {
   if (!props.product.price || !props.product.promoPrice) return null;
-  const discount = ((props.product.price - props.product.promoPrice) / props.product.price) * 100;
+  const discount =
+    ((props.product.price - props.product.promoPrice) / props.product.price) *
+    100;
   return Math.round(discount);
 });
 </script>

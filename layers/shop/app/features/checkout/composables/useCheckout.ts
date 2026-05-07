@@ -1,7 +1,7 @@
 import { useStoreStores } from '../../../stores/useStoreStores'
 import { useCart } from '../../showcase/composables/useCart'
 import type { CartItem } from '~/types/app'
-import { formatCurrency } from '../../../utils/currency'
+import { formatCurrency } from '~/utils/currency'
 
 interface CheckoutData {
   firstName: string

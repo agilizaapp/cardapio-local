@@ -59,13 +59,31 @@
         >
           {{ product?.name }}
         </h2>
-        <span class="text-xl text-primary font-bold mb-4">
-          {{ formattedPrice }}
-        </span>
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xl text-primary font-bold">
+            {{ formattedPrice }}
+          </span>
+          <span
+            v-if="product?.stock !== undefined"
+            :class="[
+              'text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border',
+              (product.stock || 0) > 0
+                ? 'text-green-600 border-green-100 bg-green-50'
+                : 'text-red-600 border-red-100 bg-red-50',
+            ]"
+          >
+            {{
+              (product.stock || 0) > 0
+                ? `${product.stock} em estoque`
+                : "Esgotado"
+            }}
+          </span>
+        </div>
 
         <p class="text-sm text-gray-500 leading-relaxed mb-6 flex-1">
           {{
-            product?.description || "Sem descrição disponível para este produto."
+            product?.description ||
+            "Sem descrição disponível para este produto."
           }}
         </p>
 
@@ -105,10 +123,14 @@
           <Button
             @click="handleAddToCart"
             class="w-full h-12 uppercase tracking-widest font-bold"
-            :disabled="!allSpecsSelected"
+            :disabled="!allSpecsSelected || (product?.stock || 0) <= 0"
           >
             {{
-              allSpecsSelected ? "Adicionar ao Carrinho" : "Selecione as opções"
+              (product?.stock || 0) <= 0
+                ? "Produto Esgotado"
+                : allSpecsSelected
+                  ? "Adicionar ao Carrinho"
+                  : "Selecione as opções"
             }}
           </Button>
         </div>
@@ -120,7 +142,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import type { Product } from "~/types/app";
-import { formatCurrency } from "../../../utils/currency";
+import { formatCurrency } from "~~/app/utils/currency";
 import Button from "~/components/ui/Button.vue";
 import Card from "~/components/ui/Card.vue";
 import { cn } from "~/utils/cn";

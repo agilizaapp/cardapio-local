@@ -163,8 +163,10 @@ const handleViewDetails = (product: Product) => {
 };
 
 const handleAddToCart = (product: Product) => {
-  const hasVariations = product.variationOptions && Object.keys(product.variationOptions).length > 0;
-  
+  const hasVariations =
+    product.variationOptions &&
+    Object.keys(product.variationOptions).length > 0;
+
   if (hasVariations) {
     selectedProduct.value = product;
     isModalOpen.value = true; // Força a abertura do modal
@@ -193,11 +195,15 @@ const categoriesWithProducts = computed(() => {
     .map((c: Category) => ({
       id: c.id,
       name: c.name,
-      products: allProducts.value.filter((p: Product) => p.categoryId === c.id),
+      products: allProducts.value.filter(
+        (p: Product) => p.categoryId === c.id && (p.stock || 0) > 0,
+      ),
     }))
     .filter((c) => c.products.length > 0);
 
-  const uncategorized = allProducts.value.filter((p: Product) => !p.categoryId);
+  const uncategorized = allProducts.value.filter(
+    (p: Product) => !p.categoryId && (p.stock || 0) > 0,
+  );
   if (uncategorized.length > 0) {
     grouped.push({
       id: "uncategorized",
@@ -237,7 +243,6 @@ onUnmounted(() => {
     observer.disconnect();
   }
 });
-
 
 const getFontFamily = (fontName: string) => {
   const map: Record<string, string> = {

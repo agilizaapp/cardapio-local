@@ -22,6 +22,14 @@ export const useStoreCart = defineStore('shop:cart', () => {
     const itemId = getCartItemId(item.product.id, item.selectedSpecs)
     const existing = items.value.find(i => getCartItemId(i.product.id, i.selectedSpecs) === itemId)
     
+    const stock = item.product.stock || 0
+    const currentQty = existing ? existing.quantity : 0
+    
+    if (currentQty + item.quantity > stock) {
+      // Opcional: alert ou toast informando estoque insuficiente
+      return
+    }
+
     if (existing) {
       existing.quantity += item.quantity
     } else {
@@ -38,7 +46,9 @@ export const useStoreCart = defineStore('shop:cart', () => {
     const itemId = getCartItemId(productId, specs)
     const item = items.value.find(i => getCartItemId(i.product.id, i.selectedSpecs) === itemId)
     if (item) {
-      item.quantity = quantity
+      const stock = item.product.stock || 0
+      if (quantity > stock) return
+      item.quantity = Math.max(1, quantity)
     }
   }
 

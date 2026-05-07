@@ -104,9 +104,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import type { Product } from "~/types/app";
 
 const props = defineProps<{
-  products: any[];
+  products: Product[];
 }>();
 
 defineEmits(["select-product", "add-to-cart"]);
@@ -116,7 +117,7 @@ let interval: any = null;
 
 const promoProducts = computed(() =>
   props.products.filter(
-    (p) => p.highlighted && p.active && p.imageUrls?.length > 0,
+    (p) => p.highlighted && p.active && p.imageUrls?.length > 0 && p.stock > 0,
   ),
 );
 

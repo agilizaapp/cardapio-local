@@ -1,18 +1,18 @@
 // server/api/admin/categories/create.post.ts
-import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
+import { serverSupabaseClient } from '#supabase/server'
 import { createClient } from '@supabase/supabase-js'
 import { categoryService } from '~~/server/services/category.service'
 
 export default defineEventHandler(async (event) => {
     try {
         const body = await readBody(event)
-        
+
         if (!body.store_id || !body.name) {
             throw createError({ statusCode: 400, statusMessage: 'store_id e name são obrigatórios' })
         }
 
         const supabase = await serverSupabaseClient(event)
-        
+
         // Segurança: validar se o usuário é dono da loja
         const { data: storeAccess, error: accessError } = await supabase
             .from('stores')
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
         // Usamos o Service Role para evitar problemas de RLS na criação
         const config = useRuntimeConfig()
         const serviceKey = config.supabaseServiceKey || process.env.SUPABASE_SERVICE_KEY
-        
+
         const supabaseAdmin = createClient(
             process.env.SUPABASE_URL!,
             serviceKey!

@@ -8,7 +8,7 @@
 
 export type Plan = 'free' | 'pro' | 'enterprise'
 export type StoreRole = 'owner' | 'editor'
-export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled'
+export type OrderStatus = 'pending' | 'confirmed' | 'awaiting_payment' | 'completed' | 'cancelled'
 
 export interface DbStore {
     id: string
@@ -56,6 +56,7 @@ export interface DbProduct {
     image_urls: string[]
     specifications: DbProductSpec[]
     variation_options: DbProductVariationOption
+    stock: number
     highlighted: boolean
     active: boolean
     deleted_at: string | null
@@ -70,7 +71,10 @@ export interface DbOrder {
     customer_whatsapp: string
     status: OrderStatus
     total: number
+    subtotal: number
     delivery_fee: number
+    delivery_method: string
+    address: string | null
     pix_payload: string | null
     notes: string | null
     created_at: string
@@ -86,5 +90,6 @@ export interface DbOrderItem {
     product_name: string
     unit_price: number
     quantity: number
-    specs_snapshot: Record<string, SpecsValue>
+    specs_snapshot: Record<string, any>
+    created_at: string
 }
