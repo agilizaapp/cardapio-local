@@ -10,7 +10,7 @@
     <!-- Header Simples -->
     <header
       class="sticky top-0 z-40 flex items-center gap-4 py-6 px-4 backdrop-blur-md border-b border-white/10 transition-all duration-300"
-      style="background-color: rgba(var(--bg-primary-rgb), 0.8)"
+      style="background-color: rgba(var(--bg-primary-rgb), 0.8); color: var(--text-main)"
     >
       <NuxtLink
         :to="`/${route.params.slug}`"
@@ -420,13 +420,28 @@ const themeVars = computed(() => {
   const primaryBg = store.themeSettings.bgPrimaryColor || "#FFFFFF";
   const primaryBgRgb = hexToRgb(primaryBg);
 
+  // Cálculo de Luminância para garantir contraste
+  const r = parseInt(primaryBg.slice(1, 3), 16);
+  const g = parseInt(primaryBg.slice(3, 5), 16);
+  const b = parseInt(primaryBg.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const isDark = luminance < 0.5;
+
+  const textMain = isDark ? "#FFFFFF" : "#1A1A1A";
+  const textMuted = isDark ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+  const bgSurface = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)";
+  const borderSubtle = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
+
   return `:root {
     --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
     --secondary: ${store.themeSettings.secondaryColor || "#FFFFFF"};
     --bg-primary: ${primaryBg};
     --bg-primary-rgb: ${primaryBgRgb};
     --bg-secondary: ${store.themeSettings.bgSecondaryColor || "#F9FAFB"};
-    --text-main: ${primaryBg === "#0F172A" ? "#FFFFFF" : "#1A1A1A"};
+    --text-main: ${textMain};
+    --text-muted: ${textMuted};
+    --bg-surface: ${bgSurface};
+    --border-subtle: ${borderSubtle};
     --font-primary: '${fontFamily}', sans-serif;
   }`;
 });

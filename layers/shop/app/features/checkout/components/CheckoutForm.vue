@@ -6,7 +6,7 @@
       <div class="flex flex-col gap-3">
         <label
           class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors"
-          :class="modelValue.deliveryMethod === 'home' ? 'bg-[var(--bg-secondary)]' : 'border-white/10'"
+          :class="modelValue.deliveryMethod === 'home' ? 'bg-[var(--bg-secondary)]' : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]'"
           :style="modelValue.deliveryMethod === 'home' ? { borderColor: 'var(--primary)' } : {}"
         >
           <input
@@ -36,7 +36,7 @@
 
         <label
           class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors"
-          :class="modelValue.deliveryMethod === 'pickup' ? 'bg-[var(--bg-secondary)]' : 'border-white/10'"
+          :class="modelValue.deliveryMethod === 'pickup' ? 'bg-[var(--bg-secondary)]' : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]'"
           :style="modelValue.deliveryMethod === 'pickup' ? { borderColor: 'var(--primary)' } : {}"
         >
           <input
@@ -73,7 +73,7 @@
           type="text"
           :value="modelValue.firstName"
           @input="updateField('firstName', ($event.target as HTMLInputElement).value)"
-          class="w-full p-3 border border-white/10 bg-black/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
+          class="w-full p-3 border border-[var(--border-subtle)] bg-[var(--bg-surface)] rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
           style="color: currentColor"
           placeholder="João"
         />
@@ -85,7 +85,7 @@
           type="text"
           :value="modelValue.lastName"
           @input="updateField('lastName', ($event.target as HTMLInputElement).value)"
-          class="w-full p-3 border border-white/10 bg-black/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
+          class="w-full p-3 border border-[var(--border-subtle)] bg-[var(--bg-surface)] rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
           style="color: currentColor"
           placeholder="Silva"
         />
@@ -97,7 +97,7 @@
           type="text"
           :value="modelValue.whatsapp"
           @input="handleWhatsappInput"
-          class="w-full p-3 border border-white/10 bg-black/5 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
+          class="w-full p-3 border border-[var(--border-subtle)] bg-[var(--bg-surface)] rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-sm"
           style="color: currentColor"
           placeholder="(00) 00000-0000"
         />

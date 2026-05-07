@@ -11,7 +11,7 @@
 
     <!-- Modal Content -->
     <Card
-      class="relative w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row rounded-3xl shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-300 border-white/10"
+      class="relative w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row rounded-3xl shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-300 border-[var(--border-subtle)]"
       style="background-color: var(--bg-primary); color: var(--text-main)"
     >
       <!-- Close Button -->
@@ -19,7 +19,8 @@
         @click="close"
         variant="ghost"
         size="icon"
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 bg-gray-100/50 hover:bg-gray-100 rounded-full z-20"
+        class="absolute top-4 right-4 rounded-full z-20"
+        style="background-color: var(--bg-surface); color: var(--text-muted)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +77,7 @@
               {{ product?.name }}
             </h2>
           </div>
-          <p class="text-sm text-gray-500 leading-relaxed">
+          <p class="text-sm leading-relaxed" style="color: var(--text-muted)">
             {{ product?.description || "Sem descrição disponível." }}
           </p>
         </div>
@@ -90,7 +91,8 @@
           >
             <div class="flex justify-between items-center">
               <label
-                class="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]"
+                class="text-[11px] font-black uppercase tracking-[0.2em]"
+                style="color: currentColor"
               >
                 {{ group.name }}
               </label>
@@ -119,6 +121,7 @@
                   isOptionSelected(group.name, option) ? 'default' : 'outline'
                 "
                 class="px-4 py-2.5 text-xs font-bold rounded-xl border transition-all duration-300"
+                :style="!isOptionSelected(group.name, option) ? { color: 'currentColor' } : {}"
               >
                 {{ option }}
               </Button>
@@ -127,10 +130,11 @@
         </div>
 
         <!-- Footer -->
-        <div class="mt-auto pt-6 border-t border-white/10 flex flex-col gap-4">
+        <div class="mt-auto pt-6 border-t border-[var(--border-subtle)] flex flex-col gap-4">
           <div class="flex items-center justify-between">
             <span
-              class="text-xs font-bold opacity-40 uppercase tracking-widest"
+              class="text-xs font-bold uppercase tracking-widest"
+              style="color: var(--text-muted)"
               >Total do item</span
             >
             <span

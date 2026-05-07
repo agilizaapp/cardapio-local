@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex gap-4 items-start py-4 border-b border-white/10 last:border-0"
+    class="flex gap-4 items-start py-4 border-b border-[var(--border-subtle)] last:border-0"
   >
     <!-- Image -->
-    <div class="w-20 h-20 bg-black/5 rounded overflow-hidden flex-shrink-0">
+    <div class="w-20 h-20 bg-[var(--bg-surface)] rounded overflow-hidden flex-shrink-0">
       <img
         v-if="item.product.imageUrls?.length"
         :src="item.product.imageUrls[0]"
@@ -24,22 +24,22 @@
       </div>
 
       <!-- Specs (e.g. Color, Size) -->
-      <div v-if="hasSpecs" class="text-xs opacity-40 mt-1 truncate" style="color: currentColor">
+      <div v-if="hasSpecs" class="text-xs mt-1 truncate" style="color: var(--text-muted)">
         {{ specsText }}
       </div>
 
       <!-- Actions -->
       <div class="flex items-center justify-between mt-auto pt-3">
         <!-- Quantity Selector -->
-        <div class="flex items-center border border-white/10 rounded">
+        <div class="flex items-center border border-[var(--border-subtle)] rounded">
           <Button
             @click="
               $emit('update-quantity', item.quantity - 1, item.selectedSpecs)
             "
             variant="ghost"
             size="sm"
-            class="px-2 py-1 h-auto opacity-40 hover:opacity-100"
-            style="color: currentColor"
+            class="px-2 py-1 h-auto hover:opacity-100"
+            style="color: var(--text-muted)"
           >
             -
           </Button>
@@ -52,8 +52,8 @@
             "
             variant="ghost"
             size="sm"
-            class="px-2 py-1 h-auto opacity-40 hover:opacity-100"
-            style="color: currentColor"
+            class="px-2 py-1 h-auto hover:opacity-100"
+            style="color: var(--text-muted)"
           >
             +
           </Button>
@@ -63,8 +63,8 @@
           @click="$emit('remove', item.selectedSpecs)"
           variant="ghost"
           size="sm"
-          class="text-xs opacity-40 hover:text-red-500 hover:opacity-100 h-auto p-1 flex items-center gap-1"
-          style="color: currentColor"
+          class="text-xs hover:text-red-500 hover:opacity-100 h-auto p-1 flex items-center gap-1"
+          style="color: var(--text-muted)"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

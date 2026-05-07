@@ -1,7 +1,7 @@
 <template>
   <header
     class="sticky top-0 z-40 flex items-center justify-between py-4 px-6 backdrop-blur-md border-b border-white/10 shadow-sm transition-all duration-300"
-    style="background-color: rgba(var(--bg-primary-rgb), 0.8)"
+    style="background-color: rgba(var(--bg-primary-rgb), 0.8); color: var(--text-main)"
   >
     <div class="flex items-center gap-4">
       <!-- Menu Icon -->

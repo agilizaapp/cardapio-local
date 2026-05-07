@@ -8,16 +8,16 @@
     </h3>
 
     <div class="flex flex-col gap-2 text-sm">
-      <div class="flex justify-between opacity-50" style="color: currentColor">
+      <div class="flex justify-between" style="color: var(--text-muted)">
         <span>Subtotal</span>
         <span class="font-medium" style="color: currentColor">{{
           formatPrice(subtotal)
         }}</span>
       </div>
       <div
-        class="flex justify-between opacity-50"
+        class="flex justify-between"
         v-if="shippingFee !== undefined"
-        style="color: currentColor"
+        style="color: var(--text-muted)"
       >
         <span>Frete</span>
         <span class="font-medium" style="color: currentColor">{{
@@ -32,7 +32,7 @@
       </div> -->
     </div>
 
-    <div class="h-px w-full bg-white/10 my-1"></div>
+    <div class="h-px w-full bg-[var(--border-subtle)] my-1"></div>
 
     <div
       class="flex justify-between items-center text-lg font-bold"
@@ -69,7 +69,8 @@
       </Button>
 
       <div
-        class="flex items-center justify-center gap-1.5 text-xs text-[#797676] mt-2"
+        class="flex items-center justify-center gap-1.5 text-xs mt-2"
+        style="color: var(--text-muted)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
