@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen transition-colors duration-500"
+    class="min-h-dvh transition-colors duration-500"
     style="
       font-family: var(--font-primary, sans-serif);
       background-color: var(--bg-primary);
@@ -13,7 +13,7 @@
       @open-cart="$router.push(`/${route.params.slug}/checkout`)"
     />
 
-    <main class="px-4 py-6 flex flex-col gap-6">
+    <main class="px-4 py-6 flex flex-col gap-6 max-w-3xl mx-auto">
       <!-- Intro / Title -->
       <section>
         <p
@@ -79,7 +79,9 @@
                 :key="key"
                 class="flex justify-between text-[11px]"
               >
-                <span class="font-medium capitalize opacity-40" style="color: currentColor"
+                <span
+                  class="font-medium capitalize opacity-40"
+                  style="color: currentColor"
                   >{{ key }}:</span
                 >
                 <span
@@ -357,8 +359,12 @@ const themeVars = computed(() => {
 
   const textMain = isDark ? "#FFFFFF" : "#1A1A1A";
   const textMuted = isDark ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-  const bgSurface = isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.02)";
-  const borderSubtle = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
+  const bgSurface = isDark
+    ? "rgba(255, 255, 255, 0.05)"
+    : "rgba(0, 0, 0, 0.02)";
+  const borderSubtle = isDark
+    ? "rgba(255, 255, 255, 0.1)"
+    : "rgba(0, 0, 0, 0.08)";
 
   return `:root {
     --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
