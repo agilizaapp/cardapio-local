@@ -35,11 +35,17 @@
             class="w-full h-full object-cover opacity-60"
           />
           <!-- Overlay Gradiente -->
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"
+          ></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"
+          ></div>
 
           <!-- Content -->
-          <div class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end md:justify-center max-w-full md:max-w-[70%]">
+          <div
+            class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end md:justify-center max-w-full md:max-w-[70%]"
+          >
             <div class="space-y-2 mb-4">
               <span
                 v-if="getDiscount(product)"
@@ -47,18 +53,25 @@
               >
                 -{{ getDiscount(product) }}% de desconto
               </span>
-              <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight drop-shadow-lg">
+              <h2
+                class="text-3xl md:text-4xl font-bold text-white leading-tight drop-shadow-lg"
+              >
                 {{ product.name }}
               </h2>
             </div>
 
-            <p class="text-gray-300 text-sm md:text-base line-clamp-2 mb-6 leading-relaxed max-w-md">
+            <p
+              class="text-gray-300 text-sm md:text-base line-clamp-2 mb-6 leading-relaxed max-w-md"
+            >
               {{ product.description }}
             </p>
 
             <div class="flex items-center gap-4">
               <div class="flex flex-col">
-                <span v-if="product.promoPrice" class="text-gray-400 text-xs line-through">
+                <span
+                  v-if="product.promoPrice"
+                  class="text-gray-400 text-xs line-through"
+                >
                   {{ formatCurrency(product.price) }}
                 </span>
                 <span class="text-2xl md:text-3xl font-bold text-white">
@@ -79,7 +92,7 @@
       <!-- Controles (Dots) + navegação por setas -->
       <div
         v-if="promoProducts.length > 1"
-        class="absolute bottom-5 left-0 right-0 z-30 flex items-center justify-center gap-2"
+        class="absolute bottom-1 md:bottom-5 left-0 right-0 z-30 flex items-center justify-center gap-2"
         role="tablist"
         :aria-label="`${promoProducts.length} slides`"
       >
@@ -140,7 +153,8 @@ const next = () => {
 
 const prev = () => {
   currentIndex.value =
-    (currentIndex.value - 1 + promoProducts.value.length) % promoProducts.value.length;
+    (currentIndex.value - 1 + promoProducts.value.length) %
+    promoProducts.value.length;
 };
 
 // Swipe support

@@ -13,7 +13,7 @@
       @open-cart="$router.push(`/${route.params.slug}/checkout`)"
     />
 
-    <main class="px-4 py-6 flex flex-col gap-6 max-w-3xl mx-auto pb-28">
+    <main class="px-4 lg:px-8 py-6 flex flex-col gap-6 max-w-5xl mx-auto pb-28">
       <!-- Intro / Title -->
       <section>
         <p
@@ -143,12 +143,12 @@
           </div>
 
           <div
-            class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-4 px-4"
+            class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-2 px-4"
           >
             <div
               v-for="product in category.products.slice(0, 5)"
               :key="product.id"
-              class="w-[60vw] sm:w-[220px] flex-shrink-0 snap-start"
+              class="w-[60vw] sm:w-[220px] lg:w-[260px] flex-shrink-0 snap-start"
             >
               <ProductCard
                 :product="product"
@@ -169,7 +169,9 @@
 
       <!-- Standard Grid Layout (When searching or filtering by category) -->
       <template v-else>
-        <section class="grid grid-cols-2 gap-4 mt-2">
+        <section
+          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2"
+        >
           <ProductCard
             v-for="product in productsList"
             :key="product.id"
@@ -221,11 +223,13 @@
       >
         <button
           @click="$router.push(`/${route.params.slug}/checkout`)"
-          class="w-full max-w-3xl mx-auto flex items-center justify-between px-5 h-14 rounded-2xl shadow-2xl transition-transform active:scale-[0.98]"
+          class="w-full max-w-5xl mx-auto flex items-center justify-between px-5 h-14 rounded-2xl shadow-2xl transition-transform active:scale-[0.98]"
           style="background-color: var(--primary); color: #fff"
           aria-label="Ver carrinho"
         >
-          <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/20 font-bold text-sm">
+          <span
+            class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/20 font-bold text-sm"
+          >
             {{ totalItems }}
           </span>
           <span class="font-semibold text-sm">Ver carrinho</span>

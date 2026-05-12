@@ -44,10 +44,10 @@
     </header>
 
     <main
-      class="flex-1 px-4 py-6 flex flex-col gap-8 max-w-lg mx-auto w-full pb-24"
+      class="flex-1 px-4 lg:px-8 py-6 lg:py-10 flex flex-col gap-8 max-w-5xl mx-auto w-full pb-24"
     >
       <!-- CASO 1: Pedido em Andamento -->
-      <div v-if="currentOrderId">
+      <div v-if="currentOrderId" class="max-w-lg mx-auto w-full">
         <div
           class="flex flex-col gap-6 rounded-3xl p-6 border shadow-sm"
           style="background-color: var(--bg-secondary); border-color: var(--border-subtle)"
@@ -168,7 +168,7 @@
       <!-- CASO 2: Carrinho Vazio -->
       <div
         v-else-if="items.length === 0"
-        class="flex flex-col items-center justify-center py-20 text-center gap-4"
+        class="max-w-lg mx-auto w-full flex flex-col items-center justify-center py-20 text-center gap-4"
       >
         <div
           class="w-16 h-16 rounded-full flex items-center justify-center text-gray-300"
@@ -208,54 +208,58 @@
       </div>
 
       <!-- CASO 3: Fluxo de Checkout Ativo -->
-      <div v-else class="flex flex-col gap-4">
-        <!-- Cart Items -->
-        <section class="flex flex-col">
-          <div class="flex justify-between items-end mb-4">
-            <span class="text-xs font-semibold opacity-50 uppercase tracking-wider"
-              >{{ totalItems }} {{ totalItems === 1 ? 'item' : 'itens' }}</span
-            >
-          </div>
-          <div class="border-t" style="border-color: var(--border-subtle)">
-            <CartItemRow
-              v-for="item in items"
-              :key="`${item.product.id}-${JSON.stringify(item.selectedSpecs)}`"
-              :item="item"
-              @update-quantity="
-                (qty, specs) => updateQuantity(item.product.id, qty, specs)
-              "
-              @remove="(specs) => removeFromCart(item.product.id, specs)"
-            />
-          </div>
-        </section>
+      <div v-else class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
 
-        <!-- Erros de validação inline -->
-        <div
-          v-if="formErrors.length > 0"
-          role="alert"
-          aria-live="polite"
-          class="rounded-xl p-4 flex flex-col gap-1.5"
-          style="background-color: #FEF2F2; border: 1px solid #FECACA"
-        >
-          <p class="text-xs font-bold text-red-700 uppercase tracking-wide">Preencha os campos obrigatórios</p>
-          <ul class="list-disc list-inside">
-            <li v-for="err in formErrors" :key="err" class="text-xs text-red-600">{{ err }}</li>
-          </ul>
+        <!-- Left column: cart items + form -->
+        <div class="flex flex-col gap-6">
+          <!-- Cart Items -->
+          <section class="flex flex-col">
+            <div class="flex justify-between items-end mb-4">
+              <span class="text-xs font-semibold opacity-50 uppercase tracking-wider"
+                >{{ totalItems }} {{ totalItems === 1 ? 'item' : 'itens' }}</span
+              >
+            </div>
+            <div class="border-t" style="border-color: var(--border-subtle)">
+              <CartItemRow
+                v-for="item in items"
+                :key="`${item.product.id}-${JSON.stringify(item.selectedSpecs)}`"
+                :item="item"
+                @update-quantity="
+                  (qty, specs) => updateQuantity(item.product.id, qty, specs)
+                "
+                @remove="(specs) => removeFromCart(item.product.id, specs)"
+              />
+            </div>
+          </section>
+
+          <!-- Erros de validação inline -->
+          <div
+            v-if="formErrors.length > 0"
+            role="alert"
+            aria-live="polite"
+            class="rounded-xl p-4 flex flex-col gap-1.5"
+            style="background-color: #FEF2F2; border: 1px solid #FECACA"
+          >
+            <p class="text-xs font-bold text-red-700 uppercase tracking-wide">Preencha os campos obrigatórios</p>
+            <ul class="list-disc list-inside">
+              <li v-for="err in formErrors" :key="err" class="text-xs text-red-600">{{ err }}</li>
+            </ul>
+          </div>
+
+          <!-- Checkout Form -->
+          <section>
+            <CheckoutForm v-model="formState" :errors="fieldErrors" />
+          </section>
         </div>
 
-        <!-- Checkout Form -->
-        <section>
-          <CheckoutForm v-model="formState" :errors="fieldErrors" />
-        </section>
-
-        <!-- Order Summary -->
-        <section>
+        <!-- Right column: order summary (sticky on desktop) -->
+        <div class="lg:sticky lg:top-28">
           <OrderSummary
             :subtotal="subtotal"
             :shippingFee="shippingFee"
             @submit="handleFinalize"
           />
-        </section>
+        </div>
       </div>
     </main>
   </div>
@@ -273,8 +277,13 @@ import { useCheckout } from "../../features/checkout/composables/useCheckout";
 import { useOrderTracking } from "../../features/checkout/composables/useOrderTracking";
 import { useCart } from "../../features/showcase/composables/useCart";
 import { useStoreStores } from "../../stores/useStoreStores";
+import { useStore } from "../../features/showcase/composables/useStore";
 
 const route = useRoute();
+
+// Ensures theme data is available even on direct navigation to /checkout
+await useStore();
+
 const {
   items,
   totalItems,
@@ -528,8 +537,8 @@ const themeVars = computed(() => {
   }`;
 });
 
-useHead({
-  title: `Seu Carrinho - ${storeName.value}`,
+useHead(computed(() => ({
+  title: storeName.value ? `Carrinho — ${storeName.value}` : "Carrinho",
   style: [
     { innerHTML: themeVars.value },
     {
@@ -537,5 +546,5 @@ useHead({
         ".hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }",
     },
   ],
-});
+})));
 </script>
