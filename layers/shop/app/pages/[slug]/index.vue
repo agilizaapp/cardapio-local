@@ -11,59 +11,20 @@
       :storeName="store?.name || ''"
       :cartItemsCount="totalItems"
       @open-cart="$router.push(`/${route.params.slug}/checkout`)"
+      @open-menu="isHeaderMenuOpen = true"
     />
 
-    <!-- Intro / Store info -->
-    <div class="px-4 lg:px-8 pt-6 pb-2 max-w-5xl mx-auto flex flex-col gap-4">
-      <p
-        v-if="store?.description"
-        class="text-sm leading-relaxed"
-        style="color: var(--text-muted)"
-      >
-        {{ store.description }}
-      </p>
+    <StoreMenuSheet
+      :isOpen="isHeaderMenuOpen"
+      :storeName="store?.name || ''"
+      :cartItemsCount="totalItems"
+      @close="isHeaderMenuOpen = false"
+      @go-info="isHeaderMenuOpen = false; $router.push(`/${route.params.slug}/info`)"
+      @go-cart="isHeaderMenuOpen = false; $router.push(`/${route.params.slug}/checkout`)"
+    />
 
-      <div
-        v-if="store?.openHours"
-        class="rounded-2xl p-4"
-        style="background-color: var(--bg-secondary)"
-      >
-        <div class="flex items-center gap-2 mb-2">
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            style="color: var(--text-muted)"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span class="text-xs font-black uppercase tracking-widest opacity-40"
-            >Horários</span
-          >
-        </div>
-        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-          <div
-            v-for="(val, key) in store.openHours"
-            :key="key"
-            class="flex justify-between text-[11px]"
-          >
-            <span class="font-medium capitalize opacity-40">{{ key }}:</span>
-            <span
-              :class="val === 'fechado' ? 'text-red-400' : 'font-bold'"
-              style="color: var(--text-main)"
-              >{{ val }}</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- Hero Banner -->
+    <!-- Hero Banner -->
+    <div class="px-4 lg:px-8 pt-6 pb-2 max-w-5xl mx-auto">
       <ClientOnly>
         <HeroBanner
           v-if="!searchQuery"
@@ -183,6 +144,7 @@
 
     <!-- Category bottom sheet -->
     <Teleport to="body">
+      <!-- Backdrop fade; v-show keeps the DOM so the inner sheet Transition can play its leave animation -->
       <Transition
         enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0"
@@ -192,7 +154,7 @@
         leave-to-class="opacity-0"
       >
         <div
-          v-if="isMenuOpen"
+          v-show="isMenuOpen"
           class="fixed inset-0 z-50 bg-black/40"
           @click.self="isMenuOpen = false"
         >
@@ -321,8 +283,10 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import type { Product, Category } from "~/types/app";
 import { formatCurrency } from "~~/app/utils/currency";
+import { getFontFamily, buildThemeVars } from "~~/app/utils/theme";
 
 import StoreHeader from "../../features/showcase/components/StoreHeader.vue";
+import StoreMenuSheet from "../../features/showcase/components/StoreMenuSheet.vue";
 import SearchBar from "../../features/showcase/components/SearchBar.vue";
 import CategoryTabs from "../../features/showcase/components/CategoryTabs.vue";
 import ProductCard from "../../features/showcase/components/ProductCard.vue";
@@ -338,6 +302,7 @@ const route = useRoute();
 const searchQuery = ref("");
 const activeCategoryId = ref("all");
 const isMenuOpen = ref(false);
+const isHeaderMenuOpen = ref(false);
 const isSticky = ref(false);
 
 const { store } = await useStore();
@@ -418,27 +383,32 @@ const menuCategories = computed(() => [
 
 // Block passive scroll tracking while a programmatic scroll is animating.
 // Cleared by scrollend (reliable) + a timer fallback for older browsers.
-// No touchstart/wheel listeners — those fire during taps and break click handling.
 let isProgrammaticScroll = false;
-let programmaticScrollTimer: ReturnType<typeof setTimeout> | null = null;
 let scrollEndCleanup: (() => void) | null = null;
 
 const scrollToCategory = (id: string) => {
-  // Cancel previous animation-end listeners before starting a new scroll
-  if (scrollEndCleanup) { scrollEndCleanup(); scrollEndCleanup = null; }
-  if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
+  if (scrollEndCleanup) {
+    scrollEndCleanup();
+    scrollEndCleanup = null;
+  }
 
   activeCategoryId.value = id;
   isProgrammaticScroll = true;
 
-  const done = () => {
+  // Capture timerId locally so rapid clicks don't cancel the new timer.
+  const timerId = setTimeout(() => {
     isProgrammaticScroll = false;
     window.removeEventListener("scrollend", done);
-    if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
+    scrollEndCleanup = null;
+  }, 1200);
+
+  const done = () => {
+    isProgrammaticScroll = false;
+    clearTimeout(timerId);
+    window.removeEventListener("scrollend", done);
     scrollEndCleanup = null;
   };
   window.addEventListener("scrollend", done, { once: true });
-  programmaticScrollTimer = setTimeout(done, 1200); // fallback for no-scrollend browsers
   scrollEndCleanup = done;
 
   if (id === "all") {
@@ -456,37 +426,39 @@ const selectFromMenu = (id: string) => {
 
 // Determine the active category from scroll position.
 // The last section whose heading passed the sticky threshold (top <= offset) is
-// the candidate. But if that section's content has already scrolled fully above
-// the viewport (bottom < 0), advance forward to the next visible section —
-// this handles the "last section" case where there isn't enough page left to
-// pull its heading above the threshold.
+// the candidate. If that section scrolled fully out of view, advance to the
+// next visible one — handles the "last section" case.
+let rafPending = false;
 const updateActiveFromScroll = () => {
-  if (searchQuery.value || isProgrammaticScroll) return;
-  const items = categoriesWithProducts.value;
-  if (!items.length) return;
-  const offset = 140;
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    if (searchQuery.value || isProgrammaticScroll) return;
+    const items = categoriesWithProducts.value;
+    if (!items.length) return;
+    const offset = 140;
 
-  let passedIdx = -1;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    if (!item) continue;
-    const el = document.getElementById(`cat-${item.id}`);
-    if (el && el.getBoundingClientRect().top <= offset) passedIdx = i;
-  }
+    let passedIdx = -1;
+    for (let i = 0; i < items.length; i++) {
+      const el = document.getElementById(`cat-${items[i]?.id}`);
+      if (el && el.getBoundingClientRect().top <= offset) passedIdx = i;
+    }
 
-  if (passedIdx === -1) { activeCategoryId.value = "all"; return; }
-
-  for (let i = passedIdx; i < items.length; i++) {
-    const item = items[i];
-    if (!item) continue;
-    const el = document.getElementById(`cat-${item.id}`);
-    if (el && el.getBoundingClientRect().bottom > 0) {
-      activeCategoryId.value = item.id;
+    if (passedIdx === -1) {
+      activeCategoryId.value = "all";
       return;
     }
-  }
-  const fallbackItem = items[passedIdx];
-  if (fallbackItem) activeCategoryId.value = fallbackItem.id;
+
+    for (let i = passedIdx; i < items.length; i++) {
+      const el = document.getElementById(`cat-${items[i]?.id}`);
+      if (el && el.getBoundingClientRect().bottom > 0) {
+        activeCategoryId.value = items[i]?.id ?? "all";
+        return;
+      }
+    }
+    activeCategoryId.value = items[passedIdx]?.id ?? "all";
+  });
 };
 
 const isModalOpen = ref(false);
@@ -533,57 +505,11 @@ onUnmounted(() => {
   scrollObserver?.disconnect();
   window.removeEventListener("scroll", updateActiveFromScroll);
   if (scrollEndCleanup) scrollEndCleanup();
-  if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
 });
 
 // ── Theme & head ──────────────────────────────────────────────────────────────
 
-const getFontFamily = (fontName: string) => {
-  const map: Record<string, string> = {
-    playfair: "Playfair Display",
-    inter: "Inter",
-    outfit: "Outfit",
-    roboto: "Roboto",
-  };
-  return map[fontName?.toLowerCase()] || "Inter";
-};
-
-const hexToRgb = (hex: string) => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `${r}, ${g}, ${b}`;
-};
-
-const themeVars = computed(() => {
-  if (!store?.themeSettings) return "";
-  const fontFamily = store.themeSettings.font
-    ? getFontFamily(store.themeSettings.font)
-    : "Inter";
-  const primaryBg = store.themeSettings.bgPrimaryColor || "#FFFFFF";
-  const primaryBgRgb = hexToRgb(primaryBg);
-  const r = parseInt(primaryBg.slice(1, 3), 16);
-  const g = parseInt(primaryBg.slice(3, 5), 16);
-  const b = parseInt(primaryBg.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  const isDark = luminance < 0.5;
-  const textMain = isDark ? "#FFFFFF" : "#1A1A1A";
-  const textMuted = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
-  const bgSurface = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)";
-  const borderSubtle = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  return `:root {
-    --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
-    --secondary: ${store.themeSettings.secondaryColor || "#FFFFFF"};
-    --bg-primary: ${primaryBg};
-    --bg-primary-rgb: ${primaryBgRgb};
-    --bg-secondary: ${store.themeSettings.bgSecondaryColor || "#F9FAFB"};
-    --text-main: ${textMain};
-    --text-muted: ${textMuted};
-    --bg-surface: ${bgSurface};
-    --border-subtle: ${borderSubtle};
-    --font-primary: '${fontFamily}', sans-serif;
-  }`;
-});
+const themeVars = computed(() => buildThemeVars(store));
 
 const canonicalUrl = computed(() =>
   typeof window !== "undefined"
