@@ -16,7 +16,7 @@ const CreateOrderSchema = z.object({
     productId: z.string().uuid(),
     quantity: z.number().int().positive(),
     priceAtTime: z.number().nonnegative(),
-    selectedSpecs: z.record(z.union([z.string(), z.array(z.string())])),
+    selectedSpecs: z.record(z.string(), z.union([z.string(), z.array(z.string())])),
   })).min(1, 'O pedido deve ter pelo menos 1 item.'),
   subtotal: z.number().nonnegative(),
   deliveryFee: z.number().nonnegative(),
@@ -31,7 +31,10 @@ export default defineEventHandler(async (event) => {
   const repo = createOrderRepository(client)
 
   try {
-    const order = await repo.createOrder(body)
+    const order = await repo.createOrder({
+      ...body,
+      address: body.address ?? null,
+    })
     return order
   } catch (e: any) {
     logger.error('Erro ao criar pedido', { storeId: body.storeId, error: e.message })
