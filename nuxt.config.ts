@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     'nuxt-icons',
     '@nuxtjs/supabase',
     '@nuxtjs/tailwindcss',
+    '@vercel/speed-insights'
   ],
 
   supabase: { redirect: false },
