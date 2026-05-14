@@ -136,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAdminProductsList } from '../../../composables/useAdminProductsList'
 import { useAdminAuth } from '../../../composables/useAdminAuth'
 
@@ -158,6 +158,7 @@ watch(displaySearch, (val) => {
 })
 
 watch(categoryFilter, () => { page.value = 1 })
+onUnmounted(() => { if (debounceTimer) clearTimeout(debounceTimer) })
 
 const { storeId } = useAdminAuth()
 
@@ -176,13 +177,17 @@ const confirmDelete = async () => {
   productToDelete.value = null
 }
 
-// Carrega categorias via API (sem chamada direta ao Supabase)
+// Carrega categorias via API
 const categories = ref<{ id: string; name: string }[]>([])
-onMounted(async () => {
+
+const loadCategories = async () => {
   if (!storeId.value) return
   try {
-    const result = await $fetch<{ success: boolean; data: any[] }>(`/api/admin/categories?storeId=${storeId.value}`)
-    if (result.data) categories.value = result.data
+    const result = await $fetch<{ id: string; name: string }[]>(`/api/admin/categories?storeId=${storeId.value}`)
+    if (result) categories.value = result
   } catch {}
-})
+}
+
+onMounted(loadCategories)
+watch(storeId, loadCategories)
 </script>
