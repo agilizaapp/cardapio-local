@@ -1,15 +1,5 @@
 import { useStoreStores } from '../../../stores/useStoreStores'
-import { useCart } from '../../showcase/composables/useCart'
-import type { CartItem } from '~/types/app'
 import { formatCurrency } from '~/utils/currency'
-
-interface CheckoutData {
-  firstName: string;
-  lastName: string;
-  whatsapp: string;
-  address: string;
-  deliveryMethod: "home" | "pickup";
-}
 
 export const useCheckout = () => {
   const sanitizePhone = (phone: string) => {

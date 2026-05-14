@@ -47,7 +47,8 @@
 
       <Button
         @click="$emit('submit')"
-        class="w-full text-sm font-semibold h-14 gap-2"
+        :disabled="!canSubmit"
+        class="w-full text-sm font-semibold h-14 gap-2 disabled:opacity-40"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -81,6 +82,7 @@ const props = defineProps<{
   subtotal: number;
   shippingFee?: number;
   estimatedTax?: number;
+  canSubmit?: boolean;
 }>();
 
 defineEmits<{

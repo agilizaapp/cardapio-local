@@ -232,23 +232,17 @@
             </div>
           </section>
 
-          <!-- Erros de validação inline -->
-          <div
-            v-if="formErrors.length > 0"
-            role="alert"
-            aria-live="polite"
-            class="rounded-xl p-4 flex flex-col gap-1.5"
-            style="background-color: #FEF2F2; border: 1px solid #FECACA"
-          >
-            <p class="text-xs font-bold text-red-700 uppercase tracking-wide">Preencha os campos obrigatórios</p>
-            <ul class="list-disc list-inside">
-              <li v-for="err in formErrors" :key="err" class="text-xs text-red-600">{{ err }}</li>
-            </ul>
-          </div>
-
           <!-- Checkout Form -->
           <section>
-            <CheckoutForm v-model="formState" :errors="fieldErrors" />
+            <CheckoutForm
+              :step="formStep"
+              :state="formState"
+              :errors="formErrors"
+              :is-verifying="isVerifying"
+              @set-field="setField"
+              @proceed="proceedToDetails"
+              @back="backToPhone"
+            />
           </section>
         </div>
 
@@ -257,6 +251,7 @@
           <OrderSummary
             :subtotal="subtotal"
             :shippingFee="shippingFee"
+            :can-submit="formStep === 'details'"
             @submit="handleFinalize"
           />
         </div>
@@ -275,6 +270,7 @@ import OrderSummary from "../../features/checkout/components/OrderSummary.vue";
 import Button from "~/components/ui/Button.vue";
 
 import { useCheckout } from "../../features/checkout/composables/useCheckout";
+import { useCheckoutForm } from "../../features/checkout/composables/useCheckoutForm";
 import { useOrderTracking } from "../../features/checkout/composables/useOrderTracking";
 import { useCart } from "../../features/showcase/composables/useCart";
 import { useStoreStores } from "../../stores/useStoreStores";
@@ -393,38 +389,16 @@ const orderTimeline = computed(() => {
 });
 const storeName = computed(() => storeStores.getCurrentStore?.name ?? "");
 
-const formState = ref({
-  firstName: "",
-  lastName: "",
-  whatsapp: "",
-  address: "",
-  deliveryMethod: "home" as "home" | "pickup",
-});
-
-const formErrors = ref<string[]>([]);
-const fieldErrors = ref<Record<string, string>>({});
-
-const validateForm = () => {
-  const errors: string[] = [];
-  const fields: Record<string, string> = {};
-
-  if (!formState.value.firstName.trim()) {
-    errors.push("Nome é obrigatório");
-    fields.firstName = "Campo obrigatório";
-  }
-  if (!formState.value.whatsapp.trim()) {
-    errors.push("WhatsApp é obrigatório");
-    fields.whatsapp = "Campo obrigatório";
-  }
-  if (formState.value.deliveryMethod === "home" && !formState.value.address.trim()) {
-    errors.push("Endereço de entrega é obrigatório");
-    fields.address = "Campo obrigatório";
-  }
-
-  formErrors.value = errors;
-  fieldErrors.value = fields;
-  return errors.length === 0;
-};
+const {
+  step: formStep,
+  isVerifying,
+  state: formState,
+  errors: formErrors,
+  setField,
+  validateDetails,
+  proceedToDetails,
+  backToPhone,
+} = useCheckoutForm();
 
 const shippingFee = computed(() =>
   formState.value.deliveryMethod === "home"
@@ -435,13 +409,17 @@ const shippingFee = computed(() =>
 const estimatedTax = computed(() => subtotal.value * 0.08);
 
 const handleFinalize = async () => {
-  const { sanitizePhone, generateWhatsappUrl } = useCheckout();
+  const { sanitizePhone } = useCheckout();
 
-  if (!validateForm()) return;
+  if (!validateDetails()) return;
 
-  const customerName =
-    `${formState.value.firstName} ${formState.value.lastName}`.trim();
-  const sanitizedWhatsapp = sanitizePhone(formState.value.whatsapp);
+  const customerName = formState.value.name.trim();
+  const sanitizedWhatsapp = sanitizePhone(formState.value.phone);
+  const addressParts = [
+    formState.value.address,
+    formState.value.addressNumber,
+    formState.value.addressComplement,
+  ].filter(Boolean);
 
   try {
     // 1. Criar pedido na API
@@ -454,7 +432,7 @@ const handleFinalize = async () => {
         deliveryMethod: formState.value.deliveryMethod,
         address:
           formState.value.deliveryMethod === "home"
-            ? formState.value.address
+            ? addressParts.join(", ")
             : null,
         items: items.value.map((item) => ({
           productId: item.product.id,
