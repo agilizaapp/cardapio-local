@@ -4,9 +4,14 @@ import { useStoreStores } from "../../../stores/useStoreStores"
 export const useStore = async () => {
     const route = useRoute()
     const slug = route.params.slug as string
+    const nuxtApp = useNuxtApp()
 
     const { data, error } = await useFetch('/api/stores/getBySlug', {
-        params: { slug }
+        key: `store-${slug}`,
+        params: { slug },
+        getCachedData(key) {
+            return nuxtApp.payload.data[key] || nuxtApp.static?.data[key]
+        }
     })
 
     if (error.value) {

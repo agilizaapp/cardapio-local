@@ -25,3 +25,5 @@ logs
 
 .agent
 settings.local.json
+
+.claude

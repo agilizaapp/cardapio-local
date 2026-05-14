@@ -101,7 +101,6 @@
       <!-- Hero Banner (Destaques) -->
       <ClientOnly>
         <HeroBanner
-          v-if="!searchQuery && selectedCategoryId === 'all'"
           :products="allProducts"
           @select-product="handleViewDetails"
           @add-to-cart="handleAddToCart"
@@ -117,88 +116,89 @@
         :selectedCategoryId="selectedCategoryId"
         @select="(id) => (selectedCategoryId = id)"
       />
-
-      <!-- Categorized Layout (Only when no search and 'all' is selected) -->
-      <template v-if="selectedCategoryId === 'all' && !searchQuery">
-        <section
-          v-for="category in categoriesWithProducts"
-          :key="category.id"
-          class="mt-4"
-        >
-          <div class="flex justify-between items-end mb-4 px-1">
-            <h3
-              class="text-lg font-bold text-[var(--text-main)] uppercase tracking-tight"
-            >
-              {{ category.name }}
-            </h3>
-            <Button
-              v-if="category.products.length > 5"
-              @click="selectedCategoryId = category.id"
-              variant="ghost"
-              size="sm"
-              class="text-[var(--primary)] hover:text-[var(--primary)] h-auto px-2"
-            >
-              Ver mais
-            </Button>
-          </div>
-
-          <div
-            class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-2 px-4"
+      <ClientOnly>
+        <!-- Categorized Layout (Only when no search and 'all' is selected) -->
+        <section v-if="selectedCategoryId === 'all' && !searchQuery">
+          <section
+            v-for="category in categoriesWithProducts"
+            :key="category.id"
+            class="mt-4"
           >
-            <div
-              v-for="product in category.products.slice(0, 5)"
-              :key="product.id"
-              class="w-[60vw] sm:w-[220px] lg:w-[260px] flex-shrink-0 snap-start"
-            >
-              <ProductCard
-                :product="product"
-                @view-details="handleViewDetails"
-                @add-to-cart="handleAddToCart"
-              />
+            <div class="flex justify-between items-end mb-4 px-1">
+              <h3
+                class="text-lg font-bold text-[var(--text-main)] uppercase tracking-tight"
+              >
+                {{ category.name }}
+              </h3>
+              <Button
+                v-if="category.products.length > 5"
+                @click="selectedCategoryId = category.id"
+                variant="ghost"
+                size="sm"
+                class="text-[var(--primary)] hover:text-[var(--primary)] h-auto px-2"
+              >
+                Ver mais
+              </Button>
             </div>
-          </div>
-        </section>
 
-        <div
-          v-if="categoriesWithProducts.length === 0 && !pending"
-          class="py-10 text-center text-[#797676]"
-        >
-          Nenhum produto encontrado.
-        </div>
-      </template>
+            <div
+              class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-2 px-4"
+            >
+              <div
+                v-for="product in category.products.slice(0, 5)"
+                :key="product.id"
+                class="w-[60vw] sm:w-[220px] lg:w-[260px] flex-shrink-0 snap-start"
+              >
+                <ProductCard
+                  :product="product"
+                  @view-details="handleViewDetails"
+                  @add-to-cart="handleAddToCart"
+                />
+              </div>
+            </div>
+          </section>
 
-      <!-- Standard Grid Layout (When searching or filtering by category) -->
-      <template v-else>
-        <section
-          class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2"
-        >
-          <ProductCard
-            v-for="product in productsList"
-            :key="product.id"
-            :product="product"
-            @view-details="handleViewDetails"
-            @add-to-cart="handleAddToCart"
-          />
           <div
-            v-if="productsList.length === 0 && !pending"
-            class="col-span-2 py-10 text-center text-[#797676]"
+            v-if="categoriesWithProducts.length === 0 && !pending"
+            class="py-10 text-center text-[#797676]"
           >
             Nenhum produto encontrado.
           </div>
         </section>
 
-        <!-- Infinite Scroll Sentinel -->
-        <div
-          ref="observerTarget"
-          class="w-full py-6 flex justify-center items-center h-12"
-        >
-          <span
-            v-if="isLoadingMore"
-            class="text-sm text-[#797676] animate-pulse"
-            >Carregando mais produtos...</span
+        <!-- Standard Grid Layout (When searching or filtering by category) -->
+        <section v-else>
+          <section
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2"
           >
-        </div>
-      </template>
+            <ProductCard
+              v-for="product in productsList"
+              :key="product.id"
+              :product="product"
+              @view-details="handleViewDetails"
+              @add-to-cart="handleAddToCart"
+            />
+            <div
+              v-if="productsList.length === 0 && !pending"
+              class="col-span-2 py-10 text-center text-[#797676]"
+            >
+              Nenhum produto encontrado.
+            </div>
+          </section>
+
+          <!-- Infinite Scroll Sentinel -->
+          <div
+            ref="observerTarget"
+            class="w-full py-6 flex justify-center items-center h-12"
+          >
+            <span
+              v-if="isLoadingMore"
+              class="text-sm text-[#797676] animate-pulse"
+              >Carregando mais produtos...</span
+            >
+          </div>
+        </section>
+      </ClientOnly>
     </main>
 
     <ProductDetailsModal
@@ -255,7 +255,6 @@ import HeroBanner from "../../features/showcase/components/HeroBanner.vue";
 import { useStore } from "../../features/showcase/composables/useStore";
 import { useProducts } from "../../features/showcase/composables/useProducts";
 import { useCart } from "../../features/showcase/composables/useCart";
-import { useStoreStores } from "../../stores/useStoreStores";
 
 const route = useRoute();
 
@@ -290,10 +289,10 @@ const handleAddToCart = (product: Product) => {
 };
 
 const categories = computed(() => {
-  const store = useStoreStores().getCategories;
+  const storeCategories = store?.categories ?? [];
   return [
     { id: "all", name: "Todos" },
-    ...store.map((c: Category) => ({
+    ...storeCategories.map((c: Category) => ({
       id: c.id,
       name: c.name,
     })),
@@ -303,7 +302,7 @@ const categories = computed(() => {
 const categoriesWithProducts = computed(() => {
   if (!allProducts.value) return [];
 
-  const storeCategories = useStoreStores().getCategories;
+  const storeCategories = store?.categories ?? [];
 
   const grouped = storeCategories
     .map((c: Category) => ({
@@ -415,17 +414,24 @@ const themeVars = computed(() => {
 });
 
 const canonicalUrl = computed(() =>
-  typeof window !== 'undefined' ? `${window.location.origin}/${route.params.slug}` : ''
-)
+  typeof window !== "undefined"
+    ? `${window.location.origin}/${route.params.slug}`
+    : "",
+);
 
 useHead({
   title: store?.name ? `${store.name} - Catálogo` : "Catálogo",
   meta: [
-    { name: 'description', content: store?.description ?? `Conheça o cardápio de ${store?.name ?? 'nossa loja'}` },
-    { property: 'og:title', content: store?.name ?? 'Catálogo' },
-    { property: 'og:description', content: store?.description ?? '' },
-    { property: 'og:image', content: store?.logoUrl ?? '' },
-    { property: 'og:type', content: 'website' },
+    {
+      name: "description",
+      content:
+        store?.description ??
+        `Conheça o cardápio de ${store?.name ?? "nossa loja"}`,
+    },
+    { property: "og:title", content: store?.name ?? "Catálogo" },
+    { property: "og:description", content: store?.description ?? "" },
+    { property: "og:image", content: store?.logoUrl ?? "" },
+    { property: "og:type", content: "website" },
   ],
   link: computed(() => {
     const font = store?.themeSettings?.font
@@ -436,7 +442,7 @@ useHead({
         rel: "stylesheet",
         href: `https://fonts.googleapis.com/css2?family=${font.replace(" ", "+")}:wght@400;500;600;700;800&display=swap`,
       },
-      { rel: 'canonical', href: canonicalUrl.value },
+      { rel: "canonical", href: canonicalUrl.value },
     ];
   }),
   style: [

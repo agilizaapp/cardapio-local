@@ -76,31 +76,28 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
     } else {
         // ESTRATÉGIA CLIENT-SIDE: Busca tudo, filtra local, exibe de forma progressiva (lazy load)
         const storeProducts = useStoreProducts()
-        const renderedCount = ref(12) // Começa mostrando uma grade completa (12)
-        const pending = ref(false)
+        const renderedCount = ref(12)
+        const nuxtApp = useNuxtApp()
 
-        // Cache inteligente: Verifica se o Pinia já possui os dados (navegação de volta do carrinho)
-        if (!storeProducts.allProducts || storeProducts.allProducts.length === 0) {
-            pending.value = true
-            const nuxtApp = useNuxtApp()
-            
-            const { data } = await useFetch("/api/products/getAll", {
-                key: `products-all-${storeId.value}`,
-                params: { storeId: storeId.value, limit: 1000 },
-                watch: false,
-                getCachedData(key) {
-                    return nuxtApp.payload.data[key] || nuxtApp.static?.data[key]
-                }
-            })
-
-            if (data.value?.data) {
-                storeProducts.setAllProducts(data.value.data)
+        // Sempre passa pelo useFetch — getCachedData retorna o payload do SSR no cliente,
+        // sem re-fetch, garantindo que data.value seja idêntico em SSR e CSR.
+        const { data, pending } = await useFetch("/api/products/getAll", {
+            key: `products-all-${storeId.value}`,
+            params: { storeId: storeId.value, limit: 1000 },
+            watch: false,
+            getCachedData(key) {
+                return nuxtApp.payload.data[key] || nuxtApp.static?.data[key]
             }
-            pending.value = false
+        })
+
+        if (data.value?.data) {
+            storeProducts.setAllProducts(data.value.data)
         }
 
+        const rawProducts = computed(() => data.value?.data || storeProducts.allProducts || [])
+
         const filteredClientProducts = computed(() => {
-            let list = storeProducts.allProducts || []
+            let list = rawProducts.value
             if (query?.value) {
                 const q = query.value.toLowerCase()
                 list = list.filter(p => p.name.toLowerCase().includes(q))
@@ -119,10 +116,8 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
             useStoreProducts().setProducts(toShow)
         }
 
-        // Setup inicial
         updateClientList()
 
-        // Resetar o contador de exibição quando o usuário filtrar/pesquisar
         watch([query, categoryId], () => {
             renderedCount.value = 12
             updateClientList()
@@ -131,16 +126,13 @@ export const useProducts = async (query?: Ref<string>, categoryId?: Ref<string>)
         const loadMore = async () => {
             if (!hasMore.value || isLoadingMore.value) return
             isLoadingMore.value = true
-            
-            // Adiciona um pequeno delay de UI para simular o carregamento suave
             await new Promise(resolve => setTimeout(resolve, 300))
-            
-            renderedCount.value += 8 // Mostra mais 8 a cada scroll
+            renderedCount.value += 8
             updateClientList()
             isLoadingMore.value = false
         }
 
-        const allProducts = computed(() => storeProducts.allProducts || [])
+        const allProducts = rawProducts
         return { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending }
     }
 }
