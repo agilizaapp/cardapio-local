@@ -414,8 +414,19 @@ const themeVars = computed(() => {
   }`;
 });
 
+const canonicalUrl = computed(() =>
+  typeof window !== 'undefined' ? `${window.location.origin}/${route.params.slug}` : ''
+)
+
 useHead({
   title: store?.name ? `${store.name} - Catálogo` : "Catálogo",
+  meta: [
+    { name: 'description', content: store?.description ?? `Conheça o cardápio de ${store?.name ?? 'nossa loja'}` },
+    { property: 'og:title', content: store?.name ?? 'Catálogo' },
+    { property: 'og:description', content: store?.description ?? '' },
+    { property: 'og:image', content: store?.logoUrl ?? '' },
+    { property: 'og:type', content: 'website' },
+  ],
   link: computed(() => {
     const font = store?.themeSettings?.font
       ? getFontFamily(store.themeSettings.font)
@@ -425,6 +436,7 @@ useHead({
         rel: "stylesheet",
         href: `https://fonts.googleapis.com/css2?family=${font.replace(" ", "+")}:wght@400;500;600;700;800&display=swap`,
       },
+      { rel: 'canonical', href: canonicalUrl.value },
     ];
   }),
   style: [
