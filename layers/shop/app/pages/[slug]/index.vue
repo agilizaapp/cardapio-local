@@ -8,197 +8,170 @@
     "
   >
     <StoreHeader
-      :storeName="store?.name || 'PRISTINE'"
+      :storeName="store?.name || ''"
       :cartItemsCount="totalItems"
       @open-cart="$router.push(`/${route.params.slug}/checkout`)"
     />
 
-    <main class="px-4 lg:px-8 py-6 flex flex-col gap-6 max-w-5xl mx-auto pb-28">
-      <!-- Intro / Title -->
-      <section>
-        <p
-          v-if="store?.description"
-          class="text-[#797676] text-sm leading-relaxed"
-        >
-          {{ store?.description }}
-        </p>
+    <!-- Intro / Store info -->
+    <div class="px-4 lg:px-8 pt-6 pb-2 max-w-5xl mx-auto flex flex-col gap-4">
+      <p
+        v-if="store?.description"
+        class="text-sm leading-relaxed"
+        style="color: var(--text-muted)"
+      >
+        {{ store.description }}
+      </p>
 
-        <!-- Store Info: WhatsApp & Hours -->
-        <div class="mt-4 flex flex-col gap-3">
-          <!-- <div v-if="store?.whatsapp" class="flex items-center gap-2">
-            <div
-              class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center"
-            >
-              <svg
-                class="w-4 h-4 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
-                />
-              </svg>
-            </div>
-            <a
-              :href="`https://wa.me/${store?.whatsapp?.replace(/\D/g, '')}`"
-              target="_blank"
-              class="text-sm font-bold text-gray-900"
-            >
-              {{ store?.whatsapp }}
-            </a>
-          </div> -->
-
-          <div
-            v-if="store?.openHours"
-            class="rounded-2xl p-4"
-            style="background-color: var(--bg-secondary)"
+      <div
+        v-if="store?.openHours"
+        class="rounded-2xl p-4"
+        style="background-color: var(--bg-secondary)"
+      >
+        <div class="flex items-center gap-2 mb-2">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            style="color: var(--text-muted)"
           >
-            <div class="flex items-center gap-2 mb-2">
-              <svg
-                class="w-4 h-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-              <span
-                class="text-xs font-black uppercase tracking-widest opacity-40"
-                style="color: currentColor"
-                >Horários</span
-              >
-            </div>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-              <div
-                v-for="(val, key) in store.openHours"
-                :key="key"
-                class="flex justify-between text-[11px]"
-              >
-                <span
-                  class="font-medium capitalize opacity-40"
-                  style="color: currentColor"
-                  >{{ key }}:</span
-                >
-                <span
-                  :class="
-                    val === 'fechado'
-                      ? 'text-red-400'
-                      : 'text-[var(--text-main)] font-bold'
-                  "
-                  >{{ val }}</span
-                >
-              </div>
-            </div>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span class="text-xs font-black uppercase tracking-widest opacity-40"
+            >Horários</span
+          >
+        </div>
+        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div
+            v-for="(val, key) in store.openHours"
+            :key="key"
+            class="flex justify-between text-[11px]"
+          >
+            <span class="font-medium capitalize opacity-40">{{ key }}:</span>
+            <span
+              :class="val === 'fechado' ? 'text-red-400' : 'font-bold'"
+              style="color: var(--text-main)"
+              >{{ val }}</span
+            >
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- Hero Banner (Destaques) -->
+      <!-- Hero Banner -->
       <ClientOnly>
         <HeroBanner
+          v-if="!searchQuery"
           :products="allProducts"
           @select-product="handleViewDetails"
           @add-to-cart="handleAddToCart"
         />
       </ClientOnly>
+    </div>
 
-      <!-- Search -->
-      <SearchBar v-model="searchQuery" />
+    <!-- Sticky sentinel: when this exits viewport the bar gets a shadow -->
+    <div ref="stickySentinel" class="h-px w-full -mb-px" aria-hidden="true" />
 
-      <!-- Categories -->
-      <CategoryTabs
-        :categories="categories"
-        :selectedCategoryId="selectedCategoryId"
-        @select="(id) => (selectedCategoryId = id)"
-      />
-      <ClientOnly>
-        <!-- Categorized Layout (Only when no search and 'all' is selected) -->
-        <section v-if="selectedCategoryId === 'all' && !searchQuery">
-          <section
-            v-for="category in categoriesWithProducts"
-            :key="category.id"
-            class="mt-4"
-          >
-            <div class="flex justify-between items-end mb-4 px-1">
-              <h3
-                class="text-lg font-bold text-[var(--text-main)] uppercase tracking-tight"
-              >
-                {{ category.name }}
-              </h3>
-              <Button
-                v-if="category.products.length > 5"
-                @click="selectedCategoryId = category.id"
-                variant="ghost"
-                size="sm"
-                class="text-[var(--primary)] hover:text-[var(--primary)] h-auto px-2"
-              >
-                Ver mais
-              </Button>
-            </div>
+    <!-- Sticky filter bar (search + category tabs) -->
+    <div
+      class="sticky top-[60px] z-20 px-4 lg:px-8 py-3 transition-shadow duration-200"
+      :class="isSticky ? 'shadow-lg' : ''"
+      style="background-color: var(--bg-primary)"
+    >
+      <div class="max-w-5xl mx-auto flex flex-col gap-2">
+        <SearchBar v-model="searchQuery" />
+        <CategoryTabs
+          :categories="categories"
+          :activeCategoryId="activeCategoryId"
+          @select="scrollToCategory"
+          @open-menu="isMenuOpen = true"
+        />
+      </div>
+    </div>
 
-            <div
-              class="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar -mx-2 px-4"
-            >
-              <div
-                v-for="product in category.products.slice(0, 5)"
-                :key="product.id"
-                class="w-[60vw] sm:w-[220px] lg:w-[260px] flex-shrink-0 snap-start"
-              >
-                <ProductCard
-                  :product="product"
-                  @view-details="handleViewDetails"
-                  @add-to-cart="handleAddToCart"
-                />
-              </div>
-            </div>
-          </section>
-
-          <div
-            v-if="categoriesWithProducts.length === 0 && !pending"
-            class="py-10 text-center text-[#797676]"
-          >
-            Nenhum produto encontrado.
-          </div>
-        </section>
-
-        <!-- Standard Grid Layout (When searching or filtering by category) -->
-        <section v-else>
-          <section
-            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2"
-          >
+    <!-- Main content -->
+    <main class="px-4 lg:px-8 py-4 max-w-5xl mx-auto pb-28">
+      <!-- Search results: flat list -->
+      <section v-if="searchQuery">
+        <div class="flex flex-col">
+          <template v-for="product in productsList" :key="product.id">
             <ProductCard
-              v-for="product in productsList"
-              :key="product.id"
               :product="product"
               @view-details="handleViewDetails"
               @add-to-cart="handleAddToCart"
             />
             <div
-              v-if="productsList.length === 0 && !pending"
-              class="col-span-2 py-10 text-center text-[#797676]"
-            >
-              Nenhum produto encontrado.
-            </div>
-          </section>
+              class="h-px mx-1"
+              style="background-color: var(--border-subtle)"
+            />
+          </template>
+        </div>
 
-          <!-- Infinite Scroll Sentinel -->
-          <div
-            ref="observerTarget"
-            class="w-full py-6 flex justify-center items-center h-12"
+        <div
+          v-if="productsList.length === 0 && !pending"
+          class="py-16 text-center"
+          style="color: var(--text-muted)"
+        >
+          Nenhum produto encontrado.
+        </div>
+
+        <!-- Infinite scroll sentinel -->
+        <div
+          ref="observerTarget"
+          class="w-full h-12 flex items-center justify-center"
+        >
+          <span
+            v-if="isLoadingMore"
+            class="text-sm animate-pulse"
+            style="color: var(--text-muted)"
           >
-            <span
-              v-if="isLoadingMore"
-              class="text-sm text-[#797676] animate-pulse"
-              >Carregando mais produtos...</span
-            >
+            Carregando mais produtos...
+          </span>
+        </div>
+      </section>
+
+      <!-- Category sections: anchor layout -->
+      <section v-else>
+        <div
+          v-for="category in categoriesWithProducts"
+          :key="category.id"
+          :id="`cat-${category.id}`"
+          class="scroll-mt-32 mb-8"
+        >
+          <h3
+            class="text-xs font-black uppercase tracking-widest mb-2 px-1 pt-2 pb-3 border-b"
+            style="color: var(--text-muted); border-color: var(--border-subtle)"
+          >
+            {{ category.name }}
+          </h3>
+          <div class="flex flex-col">
+            <template v-for="product in category.products" :key="product.id">
+              <ProductCard
+                :product="product"
+                @view-details="handleViewDetails"
+                @add-to-cart="handleAddToCart"
+              />
+              <div
+                class="h-px mx-1"
+                style="background-color: var(--border-subtle)"
+              />
+            </template>
           </div>
-        </section>
-      </ClientOnly>
+        </div>
+
+        <div
+          v-if="categoriesWithProducts.length === 0 && !pending"
+          class="py-16 text-center"
+          style="color: var(--text-muted)"
+        >
+          Nenhum produto encontrado.
+        </div>
+      </section>
     </main>
 
     <ProductDetailsModal
@@ -208,7 +181,111 @@
       @add-to-cart="(p, s, qty) => addToCart(p, qty, s)"
     />
 
-    <!-- Floating Cart Bar (padrão iFood/Rappi) -->
+    <!-- Category bottom sheet -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isMenuOpen"
+          class="fixed inset-0 z-50 bg-black/40"
+          @click.self="isMenuOpen = false"
+        >
+          <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="translate-y-full"
+            enter-to-class="translate-y-0"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="translate-y-0"
+            leave-to-class="translate-y-full"
+          >
+            <div
+              v-if="isMenuOpen"
+              class="absolute bottom-0 left-0 right-0 rounded-t-3xl max-h-[80dvh] overflow-y-auto"
+              style="background-color: var(--bg-primary)"
+            >
+              <!-- Handle + header -->
+              <div
+                class="sticky top-0 z-10"
+                style="background-color: var(--bg-primary)"
+              >
+                <div class="flex justify-center pt-3 pb-1">
+                  <div
+                    class="w-10 h-1 rounded-full"
+                    style="background-color: var(--border-subtle)"
+                  />
+                </div>
+                <div
+                  class="flex items-center justify-between px-5 py-3 border-b"
+                  style="border-color: var(--border-subtle)"
+                >
+                  <span
+                    class="font-bold text-base"
+                    style="color: var(--text-main)"
+                    >Categorias</span
+                  >
+                  <button
+                    @click="isMenuOpen = false"
+                    class="w-8 h-8 flex items-center justify-center rounded-full"
+                    style="
+                      background-color: var(--bg-secondary);
+                      color: var(--text-muted);
+                    "
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Category list -->
+              <div class="px-4 pb-8">
+                <button
+                  v-for="cat in menuCategories"
+                  :key="cat.id"
+                  @click="selectFromMenu(cat.id)"
+                  class="flex items-center justify-between w-full py-4 border-b text-left"
+                  style="border-color: var(--border-subtle)"
+                >
+                  <span
+                    class="text-sm font-medium"
+                    style="color: var(--text-main)"
+                    >{{ cat.name }}</span
+                  >
+                  <span
+                    class="text-xs font-bold px-2.5 py-1 rounded-full ml-3 flex-shrink-0"
+                    style="
+                      background-color: var(--bg-secondary);
+                      color: var(--text-muted);
+                    "
+                  >
+                    {{ cat.count }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Floating Cart Bar -->
     <Transition
       enter-active-class="transition duration-300 ease-out"
       enter-from-class="translate-y-full opacity-0"
@@ -241,7 +318,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import type { Product, Category } from "~/types/app";
 import { formatCurrency } from "~~/app/utils/currency";
 
@@ -258,14 +335,14 @@ import { useCart } from "../../features/showcase/composables/useCart";
 
 const route = useRoute();
 
-// State
 const searchQuery = ref("");
-const selectedCategoryId = ref("all");
+const activeCategoryId = ref("all");
+const isMenuOpen = ref(false);
+const isSticky = ref(false);
 
-// Load Data
 const { store } = await useStore();
 const { productsList, allProducts, loadMore, hasMore, isLoadingMore, pending } =
-  await useProducts(searchQuery, selectedCategoryId);
+  await useProducts(searchQuery);
 
 const { totalItems, subtotal, addToCart } = useCart();
 const formattedSubtotal = computed(() => formatCurrency(subtotal.value));
@@ -279,28 +356,25 @@ const handleAddToCart = (product: Product) => {
   const hasVariations =
     product.variationOptions &&
     Object.keys(product.variationOptions).length > 0;
-
   if (hasVariations) {
     selectedProduct.value = product;
-    isModalOpen.value = true; // Força a abertura do modal
+    isModalOpen.value = true;
   } else {
     addToCart(product);
   }
 };
 
+// Category list for tabs (no "Todos" item since clicking = scroll not filter)
 const categories = computed(() => {
   const storeCategories = store?.categories ?? [];
   return [
     { id: "all", name: "Todos" },
-    ...storeCategories.map((c: Category) => ({
-      id: c.id,
-      name: c.name,
-    })),
+    ...storeCategories.map((c: Category) => ({ id: c.id, name: c.name })),
   ];
 });
 
 const categoriesWithProducts = computed(() => {
-  if (!allProducts.value) return [];
+  if (!allProducts.value?.length) return [];
 
   const storeCategories = store?.categories ?? [];
 
@@ -328,34 +402,141 @@ const categoriesWithProducts = computed(() => {
   return grouped;
 });
 
+// Categories with counts for the burger menu
+const menuCategories = computed(() => [
+  {
+    id: "all",
+    name: "Todos",
+    count: allProducts.value.filter((p: Product) => (p.stock || 0) > 0).length,
+  },
+  ...categoriesWithProducts.value.map((c) => ({
+    id: c.id,
+    name: c.name,
+    count: c.products.length,
+  })),
+]);
+
+// Block passive scroll tracking while a programmatic scroll is animating.
+// Cleared by scrollend (reliable) + a timer fallback for older browsers.
+// No touchstart/wheel listeners — those fire during taps and break click handling.
+let isProgrammaticScroll = false;
+let programmaticScrollTimer: ReturnType<typeof setTimeout> | null = null;
+let scrollEndCleanup: (() => void) | null = null;
+
+const scrollToCategory = (id: string) => {
+  // Cancel previous animation-end listeners before starting a new scroll
+  if (scrollEndCleanup) { scrollEndCleanup(); scrollEndCleanup = null; }
+  if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
+
+  activeCategoryId.value = id;
+  isProgrammaticScroll = true;
+
+  const done = () => {
+    isProgrammaticScroll = false;
+    window.removeEventListener("scrollend", done);
+    if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
+    scrollEndCleanup = null;
+  };
+  window.addEventListener("scrollend", done, { once: true });
+  programmaticScrollTimer = setTimeout(done, 1200); // fallback for no-scrollend browsers
+  scrollEndCleanup = done;
+
+  if (id === "all") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const el = document.getElementById(`cat-${id}`);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+const selectFromMenu = (id: string) => {
+  isMenuOpen.value = false;
+  nextTick(() => scrollToCategory(id));
+};
+
+// Determine the active category from scroll position.
+// The last section whose heading passed the sticky threshold (top <= offset) is
+// the candidate. But if that section's content has already scrolled fully above
+// the viewport (bottom < 0), advance forward to the next visible section —
+// this handles the "last section" case where there isn't enough page left to
+// pull its heading above the threshold.
+const updateActiveFromScroll = () => {
+  if (searchQuery.value || isProgrammaticScroll) return;
+  const items = categoriesWithProducts.value;
+  if (!items.length) return;
+  const offset = 140;
+
+  let passedIdx = -1;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (!item) continue;
+    const el = document.getElementById(`cat-${item.id}`);
+    if (el && el.getBoundingClientRect().top <= offset) passedIdx = i;
+  }
+
+  if (passedIdx === -1) { activeCategoryId.value = "all"; return; }
+
+  for (let i = passedIdx; i < items.length; i++) {
+    const item = items[i];
+    if (!item) continue;
+    const el = document.getElementById(`cat-${item.id}`);
+    if (el && el.getBoundingClientRect().bottom > 0) {
+      activeCategoryId.value = item.id;
+      return;
+    }
+  }
+  const fallbackItem = items[passedIdx];
+  if (fallbackItem) activeCategoryId.value = fallbackItem.id;
+};
+
 const isModalOpen = ref(false);
 const selectedProduct = ref<Product | null>(null);
 
-// Infinite Scroll Observer
+// Infinite scroll
 const observerTarget = ref<HTMLElement | null>(null);
-let observer: IntersectionObserver | null = null;
+let scrollObserver: IntersectionObserver | null = null;
+
+// Sticky sentinel observer
+const stickySentinel = ref<HTMLElement | null>(null);
+let stickyObserver: IntersectionObserver | null = null;
 
 onMounted(() => {
-  observer = new IntersectionObserver(
+  // Sticky detection
+  if (stickySentinel.value) {
+    stickyObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries && entries[0];
+        if (!entry) return;
+        isSticky.value = !entry.isIntersecting;
+      },
+      { threshold: 1 },
+    );
+    stickyObserver.observe(stickySentinel.value);
+  }
+
+  // Infinite scroll
+  scrollObserver = new IntersectionObserver(
     (entries) => {
-      const entry = entries[0];
-      if (entry?.isIntersecting && hasMore.value && !isLoadingMore.value) {
+      if (entries[0]?.isIntersecting && hasMore.value && !isLoadingMore.value) {
         loadMore();
       }
     },
     { rootMargin: "100px" },
   );
+  if (observerTarget.value) scrollObserver.observe(observerTarget.value);
 
-  if (observerTarget.value && observer) {
-    observer.observe(observerTarget.value);
-  }
+  window.addEventListener("scroll", updateActiveFromScroll, { passive: true });
 });
 
 onUnmounted(() => {
-  if (observer) {
-    observer.disconnect();
-  }
+  stickyObserver?.disconnect();
+  scrollObserver?.disconnect();
+  window.removeEventListener("scroll", updateActiveFromScroll);
+  if (scrollEndCleanup) scrollEndCleanup();
+  if (programmaticScrollTimer) clearTimeout(programmaticScrollTimer);
 });
+
+// ── Theme & head ──────────────────────────────────────────────────────────────
 
 const getFontFamily = (fontName: string) => {
   const map: Record<string, string> = {
@@ -379,26 +560,17 @@ const themeVars = computed(() => {
   const fontFamily = store.themeSettings.font
     ? getFontFamily(store.themeSettings.font)
     : "Inter";
-
   const primaryBg = store.themeSettings.bgPrimaryColor || "#FFFFFF";
   const primaryBgRgb = hexToRgb(primaryBg);
-
-  // Cálculo de Luminância para garantir contraste
   const r = parseInt(primaryBg.slice(1, 3), 16);
   const g = parseInt(primaryBg.slice(3, 5), 16);
   const b = parseInt(primaryBg.slice(5, 7), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   const isDark = luminance < 0.5;
-
   const textMain = isDark ? "#FFFFFF" : "#1A1A1A";
-  const textMuted = isDark ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-  const bgSurface = isDark
-    ? "rgba(255, 255, 255, 0.05)"
-    : "rgba(0, 0, 0, 0.02)";
-  const borderSubtle = isDark
-    ? "rgba(255, 255, 255, 0.1)"
-    : "rgba(0, 0, 0, 0.08)";
-
+  const textMuted = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
+  const bgSurface = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)";
+  const borderSubtle = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
   return `:root {
     --primary: ${store.themeSettings.primaryColor || "#1A1A1A"};
     --secondary: ${store.themeSettings.secondaryColor || "#FFFFFF"};
@@ -449,7 +621,7 @@ useHead({
     { innerHTML: themeVars.value },
     {
       innerHTML:
-        ".hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }",
+        ".hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}",
     },
   ],
 });

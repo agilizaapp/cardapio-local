@@ -66,7 +66,9 @@
               {{ product.description }}
             </p>
 
-            <div class="flex items-center gap-4">
+            <div
+              class="flex items-center gap-4 justify-between md:justify-normal"
+            >
               <div class="flex flex-col">
                 <span
                   v-if="product.promoPrice"
@@ -104,7 +106,7 @@
           :aria-selected="index === currentIndex"
           :aria-label="`Slide ${index + 1} de ${promoProducts.length}`"
           :class="[
-            'h-1.5 transition-all duration-300 ease-out rounded-full min-w-[24px] min-h-[24px] flex-shrink-0',
+            'h-1 transition-all duration-300 ease-out rounded-full min-w-[24px] min-h-[12px] flex-shrink-0',
             index === currentIndex
               ? 'bg-white w-8'
               : 'bg-white/40 w-1.5 hover:bg-white/70',
@@ -162,12 +164,16 @@ let touchStartX = 0;
 const SWIPE_THRESHOLD = 50;
 
 const onTouchStart = (e: TouchEvent) => {
-  touchStartX = e.touches[0].clientX;
+  const touch = e.touches[0];
+  if (!touch) return;
+  touchStartX = touch.clientX;
 };
 
 const onTouchEnd = (e: TouchEvent) => {
   if (promoProducts.value.length <= 1) return;
-  const diff = touchStartX - e.changedTouches[0].clientX;
+  const touch = e.changedTouches[0];
+  if (!touch) return;
+  const diff = touchStartX - touch.clientX;
   if (Math.abs(diff) > SWIPE_THRESHOLD) {
     diff > 0 ? next() : prev();
     resetTimer();
